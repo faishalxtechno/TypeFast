@@ -1,5 +1,4 @@
-import React from 'react';
-import { Zap, Mail, ArrowUpRight } from 'lucide-react';
+import { Zap, Mail } from 'lucide-react';
 import { Page } from '../types';
 
 interface FooterProps {
@@ -10,9 +9,9 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   return (
     <footer id="footer" className="w-full mt-24 border-t border-slate-200/80 dark:border-slate-800/80 bg-white/70 dark:bg-[#090d16]/90 backdrop-blur-md transition-colors pt-14 pb-10">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-14">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           {/* Brand Column */}
-          <div className="space-y-3">
+          <div className="space-y-3 md:col-span-2">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-emerald-600 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
                 <Zap className="w-4 h-4 fill-white" />
@@ -25,22 +24,79 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               Type Faster. Type Smarter.
             </p>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed max-w-sm">
-              Test your typing speed, improve your accuracy, and become a faster typist.
+              The modern typing-learning platform. Benchmark your typing speed, build streaks with daily challenges, analyze keystroke cadence, and collect verified certificates.
             </p>
           </div>
 
-          {/* Quick Links Column */}
+          {/* Platform Links */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">
-              Quick Links
+              Platform Features
             </h4>
-            <ul className="space-y-2.5 text-sm font-medium text-slate-600 dark:text-slate-400">
+            <ul className="space-y-2 text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
               <li>
                 <button
                   onClick={() => onNavigate('test')}
                   className="btn-interactive hover:text-brand-500 dark:hover:text-brand-400 transition-colors flex items-center gap-1 cursor-pointer"
                 >
-                  <span>Test</span>
+                  <span>Typing Test</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('dashboard')}
+                  className="btn-interactive hover:text-brand-500 dark:hover:text-brand-400 transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Dashboard</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('history')}
+                  className="btn-interactive hover:text-brand-500 dark:hover:text-brand-400 transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  <span>History</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('analytics')}
+                  className="btn-interactive hover:text-brand-500 dark:hover:text-brand-400 transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Analytics</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('leaderboard')}
+                  className="btn-interactive hover:text-brand-500 dark:hover:text-brand-400 transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Leaderboard</span>
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          {/* Learning & Social */}
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">
+              Achievements & Connect
+            </h4>
+            <ul className="space-y-2 text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 mb-4">
+              <li>
+                <button
+                  onClick={() => onNavigate('daily-challenge')}
+                  className="btn-interactive hover:text-brand-500 dark:hover:text-brand-400 transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Daily Challenge</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('achievements')}
+                  className="btn-interactive hover:text-brand-500 dark:hover:text-brand-400 transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Achievements</span>
                 </button>
               </li>
               <li>
@@ -53,45 +109,19 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               </li>
               <li>
                 <button
-                  onClick={() => onNavigate('leaderboard')}
-                  className="btn-interactive hover:text-brand-500 dark:hover:text-brand-400 transition-colors flex items-center gap-1 cursor-pointer"
-                >
-                  <span>Leaderboard</span>
-                </button>
-              </li>
-              <li>
-                <button
                   onClick={() => onNavigate('about')}
                   className="btn-interactive hover:text-brand-500 dark:hover:text-brand-400 transition-colors flex items-center gap-1 cursor-pointer"
                 >
-                  <span>About</span>
+                  <span>About TypeFast</span>
                 </button>
               </li>
-              <li>
-                <a
-                  href="mailto:connectwithfaishal@gmail.com"
-                  className="btn-interactive hover:text-brand-500 dark:hover:text-brand-400 transition-colors inline-flex items-center gap-1"
-                >
-                  <span>Contact</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 opacity-60" />
-                </a>
-              </li>
             </ul>
-          </div>
 
-          {/* Contact Column */}
-          <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">
-              Contact
-            </h4>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mb-3">
-              Have feedback, questions, or ideas to share? Reach out anytime:
-            </p>
             <a
               href="mailto:connectwithfaishal@gmail.com"
-              className="btn-interactive inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/80 hover:bg-brand-50 dark:hover:bg-brand-950/30 text-slate-800 dark:text-slate-200 hover:text-brand-600 dark:hover:text-brand-400 border border-slate-200 dark:border-slate-700/80 text-xs sm:text-sm font-semibold transition-all shadow-sm"
+              className="btn-interactive inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800/80 hover:bg-brand-50 dark:hover:bg-brand-950/30 text-slate-800 dark:text-slate-200 hover:text-brand-600 dark:hover:text-brand-400 border border-slate-200 dark:border-slate-700/80 text-xs font-semibold transition-all shadow-xs"
             >
-              <Mail className="w-4 h-4 text-brand-500" />
+              <Mail className="w-3.5 h-3.5 text-brand-500" />
               <span>connectwithfaishal@gmail.com</span>
             </a>
           </div>
