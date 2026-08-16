@@ -9,33 +9,25 @@ interface RegisteredAccount {
   passwordHash: string;
 }
 
-// Default initial user for instant seamless experience or testing
-const DEFAULT_ACCOUNT: RegisteredAccount = {
-  profile: {
-    id: 'user-faishal-01',
-    name: 'Faishal Naushad',
-    username: 'faishal',
-    email: 'connectwithfaishal@gmail.com',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-    joinDate: 'August 2026',
-    joinedTimestamp: Date.now() - 30 * 24 * 60 * 60 * 1000,
-    bio: 'Founder & Lead Developer of TypeFast. High-speed typing enthusiast and software craftsman.'
-  },
-  passwordHash: 'typefast2026'
-};
+function hashPassword(password: string): string {
+  // One-way non-reversible client hash for mock credentials storage
+  let hash = 5381;
+  for (let i = 0; i < password.length; i++) {
+    hash = ((hash << 5) + hash) + password.charCodeAt(i);
+  }
+  return 'h_' + (hash >>> 0).toString(16);
+}
 
 function getRegisteredAccounts(): RegisteredAccount[] {
   try {
     const raw = localStorage.getItem(USERS_DB_KEY);
     if (!raw) {
-      const initial = [DEFAULT_ACCOUNT];
-      localStorage.setItem(USERS_DB_KEY, JSON.stringify(initial));
-      return initial;
+      return [];
     }
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [DEFAULT_ACCOUNT];
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
-    return [DEFAULT_ACCOUNT];
+    return [];
   }
 }
 
@@ -135,7 +127,7 @@ export function registerUser(params: {
 
   accounts.push({
     profile: newProfile,
-    passwordHash: btoa(password) // Basic obfuscation for client mock
+    passwordHash: hashPassword(password)
   });
   saveRegisteredAccounts(accounts);
 
@@ -166,7 +158,7 @@ export function loginUser(identifier: string, password: string): { success: bool
     return { success: false, error: 'No account found with those credentials.' };
   }
 
-  const validPassword = target.passwordHash === btoa(password) || target.passwordHash === password;
+  const validPassword = target.passwordHash === hashPassword(password) || target.passwordHash === btoa(password);
   if (!validPassword) {
     return { success: false, error: 'Incorrect password. Please try again.' };
   }

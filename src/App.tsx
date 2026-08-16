@@ -64,13 +64,13 @@ export const App: React.FC = () => {
         setCurrentPage('achievements');
       } else if (hash === '#/about') {
         setCurrentPage('about');
-      } else if (hash === '#/login') {
+      } else if (hash === '#/login' || hash === '#/signin' || window.location.pathname === '/signin' || window.location.pathname === '/login') {
         setCurrentPage('login');
-      } else if (hash === '#/signup') {
+      } else if (hash === '#/signup' || window.location.pathname === '/signup') {
         setCurrentPage('signup');
-      } else if (hash === '#/profile') {
+      } else if (hash === '#/profile' || window.location.pathname === '/profile') {
         setCurrentPage('profile');
-      } else if (hash === '#/test' || hash === '' || hash === '#') {
+      } else if (hash === '#/test' || hash === '' || hash === '#' || window.location.pathname === '/' || window.location.pathname === '/test') {
         setCurrentPage('test');
       }
     };
