@@ -1,5 +1,5 @@
 -- =============================================================
--- TYPEFAST V4 POSTGRESQL PRODUCTION DATABASE SCHEMA
+-- TYPEFAST V5 POSTGRESQL PRODUCTION DATABASE SCHEMA
 -- =============================================================
 
 -- Enable UUID Extension
@@ -106,3 +106,47 @@ CREATE TABLE IF NOT EXISTS daily_challenge_results (
 
 CREATE INDEX IF NOT EXISTS idx_challenge_results_challenge ON daily_challenge_results(challenge_id);
 CREATE INDEX IF NOT EXISTS idx_challenge_results_wpm ON daily_challenge_results(wpm DESC);
+
+-- =============================================================
+-- 8. V5 KEY PERFORMANCE & WEAK-KEY TELEMETRY TABLE
+-- =============================================================
+CREATE TABLE IF NOT EXISTS key_performance (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    key VARCHAR(10) NOT NULL,
+    attempts INTEGER DEFAULT 0,
+    correct INTEGER DEFAULT 0,
+    incorrect INTEGER DEFAULT 0,
+    accuracy NUMERIC(5, 2) DEFAULT 100.0,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_user_key UNIQUE(user_id, key)
+);
+
+CREATE INDEX IF NOT EXISTS idx_key_performance_user ON key_performance(user_id);
+
+-- =============================================================
+-- 9. V5 GAMIFIED XP & LEVEL TABLE
+-- =============================================================
+CREATE TABLE IF NOT EXISTS user_xp (
+    user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+    xp BIGINT DEFAULT 0,
+    level INTEGER DEFAULT 1,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =============================================================
+-- 10. V5 USER PRACTICE SESSIONS TABLE
+-- =============================================================
+CREATE TABLE IF NOT EXISTS practice_sessions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    mode VARCHAR(50) NOT NULL, -- 'weak-keys', 'combinations', 'accuracy', 'speed', 'endurance'
+    target_keys TEXT[] DEFAULT '{}',
+    wpm INTEGER NOT NULL,
+    accuracy NUMERIC(5, 2) NOT NULL,
+    errors INTEGER NOT NULL,
+    duration INTEGER NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_practice_sessions_user ON practice_sessions(user_id);

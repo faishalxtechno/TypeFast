@@ -5,6 +5,9 @@ export type Page =
   | 'dashboard'
   | 'history'
   | 'analytics'
+  | 'coach'
+  | 'practice'
+  | 'keyboard'
   | 'leaderboard'
   | 'daily-challenge'
   | 'achievements'
@@ -44,6 +47,7 @@ export interface TestResult {
   totalChars: number;
   isNewBest?: boolean;
   userId?: string;
+  xpEarned?: number;
 }
 
 export interface UserStats {
@@ -67,6 +71,7 @@ export interface LeaderboardEntry {
   movement?: 'up' | 'down' | 'same';
   movementValue?: number;
   isCurrentUser?: boolean;
+  level?: number;
 }
 
 export interface CertificateData {
@@ -97,6 +102,8 @@ export interface UserProfile {
   joinDate: string;
   joinedTimestamp: number;
   bio?: string;
+  level?: number;
+  xp?: number;
 }
 
 export interface AuthState {
@@ -148,6 +155,7 @@ export interface DailyChallengeResult {
   completedAt: number;
   rank?: number;
   topPercentile?: string;
+  xpEarned?: number;
 }
 
 export interface StreakInfo {
@@ -175,14 +183,68 @@ export interface AnalyticsSummary {
   currentWpm: number;
   averageWpm: number;
   bestWpm: number;
-  wpmImprovementRate: number; // percentage
+  wpmImprovementRate: number;
   currentAccuracy: number;
   averageAccuracy: number;
   bestAccuracy: number;
-  consistencyScore: number; // percentage (100 - standard deviation metric)
+  consistencyScore: number;
   weeklyImprovementPercent: number;
   monthlyImprovementPercent: number;
   allTimeImprovementPercent: number;
   totalTimeTypedSeconds: number;
   totalKeystrokes: number;
+}
+
+// -------------------------------------------------------------
+// V5 Types: Weak Keys, AI Coach, Heatmap, XP & Practice
+// -------------------------------------------------------------
+
+export interface KeyStat {
+  key: string;
+  attempts: number;
+  correct: number;
+  incorrect: number;
+  accuracy: number; // percentage (0-100)
+  mistakesAgainst: Record<string, number>; // typedKey -> count
+}
+
+export type KeyPerformanceMap = Record<string, KeyStat>;
+
+export type PracticeMode = 'weak-keys' | 'combinations' | 'accuracy' | 'speed' | 'endurance';
+
+export interface PracticeSession {
+  id: string;
+  mode: PracticeMode;
+  targetKeys: string[];
+  duration: number;
+  text: string;
+  baselineWpm: number;
+  baselineAccuracy: number;
+  completedWpm: number;
+  completedAccuracy: number;
+  errors: number;
+  xpEarned: number;
+  timestamp: number;
+}
+
+export interface LevelInfo {
+  level: number;
+  title: string;
+  currentXp: number;
+  currentLevelXp: number;
+  nextLevelXp: number;
+  progressPercent: number;
+}
+
+export interface AICoachAnalysis {
+  speedAnalysis: string;
+  accuracyAnalysis: string;
+  weakKeys: string[];
+  weakCombinations: string[];
+  consistencyAnalysis: string;
+  progressAnalysis: string;
+  mainWeakness: string;
+  recommendation: string;
+  recommendedMode: PracticeMode;
+  recommendedDuration: number;
 }

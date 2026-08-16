@@ -20,6 +20,8 @@ import { getAnalyticsSummary, getAllTests } from '../services/testService';
 import { getStreakInfo } from '../services/challengeService';
 import { getStoredCertificates } from '../utils/storage';
 import { getUserAchievements } from '../services/achievementService';
+import { generateAICoachAnalysis } from '../services/aiCoachService';
+import { getLevelInfo } from '../services/xpService';
 
 interface DashboardProps {
   user: UserProfile | null;
@@ -33,6 +35,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onNavigate }) => {
   const recentTests = getAllTests().slice(0, 5);
   const achievements = getUserAchievements();
   const unlockedCount = achievements.filter(a => !!a.unlockedAt).length;
+  const analysis = generateAICoachAnalysis();
+  const levelInfo = getLevelInfo();
 
   const displayName = user ? user.name : 'Typist';
 
@@ -101,10 +105,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onNavigate }) => {
       border: 'border-orange-500/30'
     },
     {
-      label: 'Longest Streak',
-      value: `${streak.longestStreak} Days`,
-      sub: 'Record Consistency',
-      icon: <Trophy className="w-5 h-5 text-rose-500" />,
+      label: 'Gamified Level',
+      value: `Lvl ${levelInfo.level}`,
+      sub: levelInfo.title,
+      icon: <Zap className="w-5 h-5 text-rose-500" />,
       color: 'text-rose-600 dark:text-rose-400',
       bg: 'from-rose-500/10 via-rose-500/5 to-transparent',
       border: 'border-rose-500/30'
@@ -113,19 +117,40 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onNavigate }) => {
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 animate-fade-in space-y-8">
-      {/* Welcome Banner */}
+      {/* Welcome Banner with Level Bar */}
       <div className="relative overflow-hidden p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-brand-500/15 via-emerald-500/10 to-cyan-500/15 border border-brand-500/30 shadow-xl backdrop-blur-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="relative z-10 space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-500/20 text-brand-700 dark:text-brand-300 font-bold text-xs">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>TypeFast Pro Dashboard</span>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-500/20 text-brand-700 dark:text-brand-300 font-bold text-xs">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>TypeFast 5.0 Platform</span>
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold text-xs">
+              <Zap className="w-3.5 h-3.5 fill-amber-500" />
+              <span>Level {levelInfo.level} • {levelInfo.title}</span>
+            </div>
           </div>
+
           <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
             Welcome back, {displayName} 👋
           </h1>
           <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-lg">
-            Ready to push your typing speed and muscle memory to the next tier today?
+            Ready to improve your typing with AI coaching, targeted drills, and streak rewards?
           </p>
+
+          {/* XP Progress */}
+          <div className="pt-2 max-w-md">
+            <div className="flex justify-between text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+              <span>XP Progress</span>
+              <span className="font-mono">{levelInfo.currentLevelXp} / {levelInfo.nextLevelXp} XP ({levelInfo.progressPercent}%)</span>
+            </div>
+            <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-amber-500 via-brand-500 to-emerald-500 transition-all duration-500"
+                style={{ width: `${levelInfo.progressPercent}%` }}
+              />
+            </div>
+          </div>
         </div>
 
         <div className="relative z-10 flex flex-wrap items-center gap-3">
@@ -137,13 +162,37 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onNavigate }) => {
             <span>Start Typing Test</span>
           </button>
           <button
-            onClick={() => onNavigate('daily-challenge')}
+            onClick={() => onNavigate('coach')}
             className="btn-interactive flex items-center gap-2 px-5 py-3 rounded-2xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-bold text-sm border border-slate-200 dark:border-slate-700 shadow-sm cursor-pointer"
           >
-            <Flame className="w-4 h-4 text-amber-500" />
-            <span>Daily Challenge</span>
+            <Sparkles className="w-4 h-4 text-brand-500" />
+            <span>AI Coach</span>
           </button>
         </div>
+      </div>
+
+      {/* AI Recommendation Highlight Card */}
+      <div className="p-6 rounded-3xl bg-gradient-to-r from-brand-500/10 via-purple-500/10 to-amber-500/10 border-2 border-brand-500/30 shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="space-y-1 max-w-2xl">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400">
+            <Sparkles className="w-4 h-4 text-brand-500" />
+            <span>Your AI Coach Recommendation</span>
+          </div>
+          <p className="text-sm sm:text-base text-slate-800 dark:text-slate-200 font-semibold">
+            {analysis.recommendation}
+          </p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Primary focus: <strong className="capitalize">{analysis.recommendedMode}</strong> • Weak keys: <span className="font-mono text-rose-500 font-bold">{analysis.weakKeys.join(', ')}</span>
+          </p>
+        </div>
+
+        <button
+          onClick={() => onNavigate('practice')}
+          className="btn-interactive px-6 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs sm:text-sm shadow-md flex items-center gap-2 flex-shrink-0 cursor-pointer"
+        >
+          <span>Start Practice Drill</span>
+          <ArrowRight className="w-4 h-4" />
+        </button>
       </div>
 
       {/* 8 Metric Statistics Grid */}

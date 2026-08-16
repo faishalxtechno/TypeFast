@@ -1,3 +1,4 @@
+import React from 'react';
 import { Zap, Mail } from 'lucide-react';
 import { Page } from '../types';
 
@@ -24,14 +25,14 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               Type Faster. Type Smarter.
             </p>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed max-w-sm">
-              The modern typing-learning platform. Benchmark your typing speed, build streaks with daily challenges, analyze keystroke cadence, and collect verified certificates.
+              The AI-powered typing improvement platform. Discover weak keys with interactive heatmaps, drill personalized training passages, track streaks, and earn verified certificates.
             </p>
           </div>
 
-          {/* Platform Links */}
+          {/* Platform Features */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">
-              Platform Features
+              AI & Training
             </h4>
             <ul className="space-y-2 text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
               <li>
@@ -44,43 +45,43 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               </li>
               <li>
                 <button
+                  onClick={() => onNavigate('coach')}
+                  className="btn-interactive hover:text-brand-500 dark:hover:text-brand-400 transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  <span>AI Typing Coach</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('practice')}
+                  className="btn-interactive hover:text-brand-500 dark:hover:text-brand-400 transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Personalized Practice</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('keyboard')}
+                  className="btn-interactive hover:text-brand-500 dark:hover:text-brand-400 transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Keyboard Heatmap</span>
+                </button>
+              </li>
+              <li>
+                <button
                   onClick={() => onNavigate('dashboard')}
                   className="btn-interactive hover:text-brand-500 dark:hover:text-brand-400 transition-colors flex items-center gap-1 cursor-pointer"
                 >
                   <span>Dashboard</span>
                 </button>
               </li>
-              <li>
-                <button
-                  onClick={() => onNavigate('history')}
-                  className="btn-interactive hover:text-brand-500 dark:hover:text-brand-400 transition-colors flex items-center gap-1 cursor-pointer"
-                >
-                  <span>History</span>
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onNavigate('analytics')}
-                  className="btn-interactive hover:text-brand-500 dark:hover:text-brand-400 transition-colors flex items-center gap-1 cursor-pointer"
-                >
-                  <span>Analytics</span>
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onNavigate('leaderboard')}
-                  className="btn-interactive hover:text-brand-500 dark:hover:text-brand-400 transition-colors flex items-center gap-1 cursor-pointer"
-                >
-                  <span>Leaderboard</span>
-                </button>
-              </li>
             </ul>
           </div>
 
-          {/* Learning & Social */}
+          {/* Connect & Achievements */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">
-              Achievements & Connect
+              Streaks & Community
             </h4>
             <ul className="space-y-2 text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 mb-4">
               <li>
@@ -89,6 +90,14 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                   className="btn-interactive hover:text-brand-500 dark:hover:text-brand-400 transition-colors flex items-center gap-1 cursor-pointer"
                 >
                   <span>Daily Challenge</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('leaderboard')}
+                  className="btn-interactive hover:text-brand-500 dark:hover:text-brand-400 transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Leaderboard</span>
                 </button>
               </li>
               <li>

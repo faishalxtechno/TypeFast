@@ -15,10 +15,13 @@ import {
   BarChart3,
   User,
   LogOut,
-  ChevronDown
+  ChevronDown,
+  Sparkles,
+  Play
 } from 'lucide-react';
 import { Page, Theme, UserProfile } from '../types';
 import { ThemeToggle } from './ThemeToggle';
+import { getLevelInfo } from '../services/xpService';
 
 interface HeaderProps {
   currentPage: Page;
@@ -43,10 +46,14 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const levelInfo = getLevelInfo();
 
   const mainNavItems: { id: Page; label: string; icon: React.ReactNode }[] = [
     { id: 'test', label: 'Test', icon: <Keyboard className="w-4 h-4" /> },
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
+    { id: 'coach', label: 'AI Coach', icon: <Sparkles className="w-4 h-4 text-brand-500" /> },
+    { id: 'practice', label: 'Practice', icon: <Play className="w-4 h-4 text-emerald-500" /> },
+    { id: 'keyboard', label: 'Keyboard', icon: <Keyboard className="w-4 h-4 text-cyan-500" /> },
     { id: 'history', label: 'History', icon: <HistoryIcon className="w-4 h-4" /> },
     { id: 'analytics', label: 'Analytics', icon: <BarChart3 className="w-4 h-4" /> },
     { id: 'leaderboard', label: 'Leaderboard', icon: <Trophy className="w-4 h-4" /> },
@@ -77,7 +84,7 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
 
         {/* Desktop Primary Navigation */}
-        <nav className="hidden xl:flex items-center gap-1 bg-slate-100/90 dark:bg-slate-900/70 p-1 rounded-2xl border border-slate-200/70 dark:border-slate-800/70">
+        <nav className="hidden 2xl:flex items-center gap-0.5 bg-slate-100/90 dark:bg-slate-900/70 p-1 rounded-2xl border border-slate-200/70 dark:border-slate-800/70">
           {mainNavItems.map((item) => {
             const isActive = currentPage === item.id;
             return (
@@ -97,9 +104,9 @@ export const Header: React.FC<HeaderProps> = ({
           })}
         </nav>
 
-        {/* Medium Screen Reduced Navigation (Icons + Tooltips) */}
-        <nav className="hidden lg:flex xl:hidden items-center gap-1 bg-slate-100/90 dark:bg-slate-900/70 p-1 rounded-2xl border border-slate-200/70 dark:border-slate-800/70">
-          {mainNavItems.slice(0, 5).map((item) => {
+        {/* Large Screen Streamlined Navigation */}
+        <nav className="hidden lg:flex 2xl:hidden items-center gap-1 bg-slate-100/90 dark:bg-slate-900/70 p-1 rounded-2xl border border-slate-200/70 dark:border-slate-800/70">
+          {mainNavItems.slice(0, 6).map((item) => {
             const isActive = currentPage === item.id;
             return (
               <button
@@ -132,6 +139,11 @@ export const Header: React.FC<HeaderProps> = ({
             <Award className="w-4 h-4 text-yellow-500" />
             <span className="hidden xl:inline">Certificates</span>
           </button>
+
+          {/* Level Badge */}
+          <div className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-mono font-black" title={`${levelInfo.title} (${levelInfo.currentXp} XP)`}>
+            <span>Lvl {levelInfo.level}</span>
+          </div>
 
           {/* Sound click toggle */}
           <button
@@ -290,7 +302,7 @@ export const Header: React.FC<HeaderProps> = ({
                   className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-800 dark:text-slate-100 bg-slate-100 dark:bg-slate-800"
                 >
                   <User className="w-4 h-4 text-brand-500" />
-                  <span>{user.name} (Profile)</span>
+                  <span>{user.name} (Lvl {levelInfo.level})</span>
                 </button>
                 <button
                   onClick={() => {

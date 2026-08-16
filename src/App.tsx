@@ -7,6 +7,9 @@ import { Footer } from './components/Footer';
 import { AchievementToast } from './components/AchievementToast';
 import { Home } from './pages/Home';
 import { Dashboard } from './pages/Dashboard';
+import { CoachPage } from './pages/CoachPage';
+import { PracticePage } from './pages/PracticePage';
+import { KeyboardPage } from './pages/KeyboardPage';
 import { HistoryPage } from './pages/HistoryPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { Leaderboard } from './pages/Leaderboard';
@@ -19,6 +22,7 @@ import { SignupPage } from './pages/SignupPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { getCurrentUser, logoutUser } from './services/authService';
 import { checkAndUnlockAchievements } from './services/achievementService';
+import { recordKeyEvents } from './services/weakKeyService';
 
 export const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('test');
@@ -29,7 +33,7 @@ export const App: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const engine = useTypingEngine();
 
-  // Listen to URL hash changes e.g. #/dashboard, #/history, #/daily-challenge, #/certificate/TF-2026-8A72F4
+  // Listen to URL hash changes e.g. #/dashboard, #/coach, #/practice, #/keyboard
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.toLowerCase();
@@ -41,6 +45,12 @@ export const App: React.FC = () => {
         setCurrentPage('certificate');
       } else if (hash === '#/dashboard') {
         setCurrentPage('dashboard');
+      } else if (hash === '#/coach') {
+        setCurrentPage('coach');
+      } else if (hash === '#/practice') {
+        setCurrentPage('practice');
+      } else if (hash === '#/keyboard') {
+        setCurrentPage('keyboard');
       } else if (hash === '#/history') {
         setCurrentPage('history');
       } else if (hash === '#/analytics') {
@@ -86,15 +96,36 @@ export const App: React.FC = () => {
     handleNavigate('test');
   }, [handleNavigate]);
 
-  // Check achievements whenever test completes
+  // Check achievements & record key telemetry whenever test completes
   useEffect(() => {
-    if (engine.status === 'completed') {
+    if (engine.status === 'completed' && engine.result) {
+      // Check achievements
       const newlyUnlocked = checkAndUnlockAchievements();
       if (newlyUnlocked.length > 0) {
         setUnlockedAchievement(newlyUnlocked[0]);
       }
+
+      // Record character keystroke performance telemetry
+      if (engine.typedWords.length > 0) {
+        const events: { expected: string; typed: string; isCorrect: boolean }[] = [];
+        engine.typedWords.forEach((typed, wIdx) => {
+          const original = engine.words[wIdx] || '';
+          for (let i = 0; i < Math.max(typed.length, original.length); i++) {
+            const exp = original[i] || '';
+            const act = typed[i] || '';
+            if (exp) {
+              events.push({
+                expected: exp,
+                typed: act,
+                isCorrect: exp === act
+              });
+            }
+          }
+        });
+        recordKeyEvents(events);
+      }
     }
-  }, [engine.status]);
+  }, [engine.status, engine.result, engine.typedWords, engine.words]);
 
   // Global keyboard shortcuts (e.g. Tab + Enter or Esc to restart)
   useEffect(() => {
@@ -151,11 +182,14 @@ export const App: React.FC = () => {
       <main className="flex-grow flex flex-col justify-center animate-fade-in">
         {currentPage === 'test' && <Home engine={engine} onNavigate={handleNavigate} />}
         {currentPage === 'dashboard' && <Dashboard user={user} onNavigate={handleNavigate} />}
+        {currentPage === 'coach' && <CoachPage onNavigate={handleNavigate} />}
+        {currentPage === 'practice' && <PracticePage onNavigate={handleNavigate} />}
+        {currentPage === 'keyboard' && <KeyboardPage onNavigate={handleNavigate} />}
         {currentPage === 'history' && <HistoryPage onNavigate={handleNavigate} />}
         {currentPage === 'analytics' && <AnalyticsPage onNavigate={handleNavigate} />}
         {currentPage === 'leaderboard' && <Leaderboard userStats={engine.userStats} />}
         {currentPage === 'daily-challenge' && <DailyChallengePage user={user} onNavigate={handleNavigate} />}
-        {currentPage === 'achievements' && <AchievementsPage onNavigate={handleNavigate} />}
+        {currentPage === 'achievements' && <AchievementsPage />}
         {currentPage === 'certificate' && (
           <CertificatePage
             initialCertificateId={activeCertificateId}
