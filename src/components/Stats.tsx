@@ -22,7 +22,7 @@ export const Stats: React.FC<StatsProps> = ({
       value: `${timeLeft}s`,
       numericValue: timeLeft,
       icon: <TimerIcon className="w-4 h-4 text-brand-500" />,
-      colorClass: timeLeft <= 5 && isTestRunning ? 'text-rose-500 animate-pulse' : 'text-brand-500',
+      colorClass: timeLeft <= 5 && isTestRunning ? 'text-rose-500 animate-pulse font-black' : 'text-brand-600 dark:text-brand-400',
     },
     {
       label: 'WPM',
@@ -36,14 +36,14 @@ export const Stats: React.FC<StatsProps> = ({
       value: `${accuracy.toFixed(1)}%`,
       numericValue: accuracy,
       icon: <Target className="w-4 h-4 text-cyan-500" />,
-      colorClass: 'text-cyan-500 dark:text-cyan-400',
+      colorClass: 'text-cyan-600 dark:text-cyan-400',
     },
     {
       label: 'ERRORS',
       value: errors,
       numericValue: errors,
       icon: <AlertCircle className="w-4 h-4 text-rose-500" />,
-      colorClass: errors > 0 ? 'text-rose-500' : 'text-slate-400 dark:text-slate-500',
+      colorClass: errors > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400 dark:text-slate-500',
     },
   ];
 
@@ -52,7 +52,7 @@ export const Stats: React.FC<StatsProps> = ({
       {statItems.map((item, idx) => (
         <div
           key={idx}
-          className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-2xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 backdrop-blur-sm shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200"
+          className="flex flex-col items-center justify-center p-3.5 sm:p-4 rounded-2xl bg-white/80 dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800/90 backdrop-blur-md shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200 hover:scale-[1.02]"
         >
           <div className="flex items-center gap-1.5 mb-1">
             {item.icon}
@@ -60,7 +60,7 @@ export const Stats: React.FC<StatsProps> = ({
               {item.label}
             </span>
           </div>
-          <span className={`text-2xl sm:text-4xl font-extrabold tracking-tight font-mono ${item.colorClass}`}>
+          <span className={`text-2xl sm:text-4xl font-extrabold tracking-tight font-mono ${item.colorClass} transition-colors`}>
             {item.value}
           </span>
         </div>

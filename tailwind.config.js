@@ -8,8 +8,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-        mono: ['"JetBrains Mono"', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
       },
       colors: {
         brand: {
@@ -30,12 +30,15 @@ export default {
           amber: '#f59e0b',
           purple: '#8b5cf6',
           rose: '#f43f5e',
+          blue: '#3b82f6',
         },
         dark: {
-          bg: '#0c1017',
-          card: '#151b26',
-          cardHover: '#1c2433',
-          border: '#232d3f',
+          bg: '#090d16',
+          surface: '#0f172a',
+          card: '#131b2e',
+          cardHover: '#1a243d',
+          border: '#1e293b',
+          borderSubtle: '#1e293b80',
           textMuted: '#64748b',
           textSecondary: '#94a3b8',
           textPrimary: '#f8fafc',
@@ -43,9 +46,10 @@ export default {
       },
       animation: {
         'caret-blink': 'caretBlink 1s ease-in-out infinite',
-        'pulse-subtle': 'pulseSubtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'fade-in': 'fadeIn 0.25s ease-out forwards',
-        'slide-up': 'slideUp 0.3s ease-out forwards',
+        'pulse-subtle': 'pulseSubtle 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'fade-in': 'fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        'slide-up': 'slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        'scale-in': 'scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards',
       },
       keyframes: {
         caretBlink: {
@@ -54,17 +58,27 @@ export default {
         },
         pulseSubtle: {
           '0%, 100%': { opacity: '1', transform: 'scale(1)' },
-          '50%': { opacity: '0.85', transform: 'scale(1.02)' },
+          '50%': { opacity: '0.88', transform: 'scale(1.015)' },
         },
         fadeIn: {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
-        },
-        slideUp: {
-          '0%': { opacity: '0', transform: 'translateY(12px)' },
+          '0%': { opacity: '0', transform: 'translateY(4px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
+        slideUp: {
+          '0%': { opacity: '0', transform: 'translateY(16px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        scaleIn: {
+          '0%': { opacity: '0', transform: 'scale(0.96)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
+        },
       },
+      boxShadow: {
+        'glow-brand': '0 0 25px -5px rgba(16, 185, 129, 0.25)',
+        'glow-cyan': '0 0 25px -5px rgba(6, 182, 212, 0.25)',
+        'glow-amber': '0 0 25px -5px rgba(245, 158, 11, 0.25)',
+        'card-glass': '0 8px 32px 0 rgba(0, 0, 0, 0.2)',
+      }
     },
   },
   plugins: [],

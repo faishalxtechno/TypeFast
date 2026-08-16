@@ -3,7 +3,7 @@ import { Zap, Activity, Target, Award, CheckCircle, Lightbulb, BookOpen, Layers 
 
 export const About: React.FC = () => {
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 animate-fade-in space-y-10">
+    <div id="about" className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 animate-fade-in space-y-10 scroll-mt-20">
       {/* Hero */}
       <div className="text-center pt-2">
         <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-600 dark:text-brand-400 text-xs sm:text-sm font-bold uppercase tracking-wider mb-4">
@@ -14,12 +14,12 @@ export const About: React.FC = () => {
           About TypeFast
         </h1>
         <p className="mt-4 text-base sm:text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
-          TypeFast is a modern typing practice platform designed to help users improve typing speed, accuracy, and consistency.
+          TypeFast is a modern typing test platform designed to help users improve typing speed, accuracy, and consistency.
         </p>
       </div>
 
       {/* Section: What is TypeFast? */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 shadow-lg backdrop-blur-md">
+      <div className="p-6 sm:p-8 rounded-3xl bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 shadow-lg backdrop-blur-md transition-all hover:border-brand-500/30">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-2xl bg-brand-500/10 flex items-center justify-center text-brand-500">
             <Zap className="w-5 h-5" />
@@ -29,12 +29,12 @@ export const About: React.FC = () => {
           </h2>
         </div>
         <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-sm sm:text-base">
-          TypeFast is built from the ground up for software developers, writers, students, and professionals who demand a clean, zero-distraction typing experience. By focusing on live feedback, granular error tracking, and customizable test parameters, TypeFast enables you to build muscle memory and reach your peak typing velocity.
+          TypeFast is built from the ground up for software developers, writers, students, and professionals who demand a clean, zero-distraction typing experience. By focusing on live feedback, granular error tracking, tactile audio synthesis, and customizable test parameters, TypeFast enables you to build muscle memory and reach your peak typing velocity.
         </p>
       </div>
 
       {/* Section: Why Typing Speed Matters */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 shadow-lg backdrop-blur-md">
+      <div className="p-6 sm:p-8 rounded-3xl bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 shadow-lg backdrop-blur-md transition-all hover:border-amber-500/30">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500">
             <Activity className="w-5 h-5" />

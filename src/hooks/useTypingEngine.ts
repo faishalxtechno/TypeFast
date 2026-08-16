@@ -3,7 +3,7 @@ import { TestDuration, Difficulty, TestResult, UserStats } from '../types';
 import { generateWords } from '../data/words';
 import { calculateWPM, calculateRawWPM, calculateAccuracy, countCharacterStats } from '../utils/typingCalculations';
 import { getStoredStats, saveTestResult, getStoredSettings, saveStoredSettings } from '../utils/storage';
-import { playKeyClickSound } from '../utils/sound';
+import { playKeyClickSound, playCompletionSound, initAudio } from '../utils/sound';
 
 export type TestStatus = 'idle' | 'running' | 'completed';
 
@@ -84,6 +84,9 @@ export function useTypingEngine(): UseTypingEngineReturn {
   const setSoundEnabled = (enabled: boolean) => {
     setSoundEnabledState(enabled);
     saveStoredSettings({ duration, difficulty, soundEnabled: enabled });
+    if (enabled) {
+      initAudio();
+    }
   };
 
   // Helper to reinitialize with given params
@@ -160,11 +163,16 @@ export function useTypingEngine(): UseTypingEngineReturn {
     setUserStats(updatedStats);
     setStatus('completed');
     setTimeLeft(0);
-  }, [duration, difficulty, words, typedWords, userInput, wordIndex, keystrokesCount]);
+
+    if (soundEnabled) {
+      playCompletionSound();
+    }
+  }, [duration, difficulty, words, typedWords, userInput, wordIndex, keystrokesCount, soundEnabled]);
 
   // Start test on first keypress
   const startTest = useCallback(() => {
     if (status !== 'idle') return;
+    initAudio();
     setStatus('running');
     const now = Date.now();
     startTimeRef.current = now;
@@ -208,7 +216,7 @@ export function useTypingEngine(): UseTypingEngineReturn {
     }
   }, [wordIndex, words.length, difficulty]);
 
-  // Handle keystroke logic
+  // Handle keystroke logic with zero latency
   const handleKeyDown = useCallback((e: React.KeyboardEvent | KeyboardEvent) => {
     // If completed or non-input modifiers pressed (except shift)
     if (status === 'completed' || e.ctrlKey || e.metaKey || e.altKey) {
@@ -290,6 +298,7 @@ export function useTypingEngine(): UseTypingEngineReturn {
     if (value.endsWith(' ')) {
       const trimmed = value.slice(0, -1);
       if (trimmed.length > 0) {
+        if (soundEnabled) playKeyClickSound(false);
         setKeystrokesCount(prev => prev + 1);
         setTypedWords(prev => [...prev, trimmed]);
         setWordIndex(prev => prev + 1);
@@ -298,9 +307,16 @@ export function useTypingEngine(): UseTypingEngineReturn {
       }
     }
 
+    if (soundEnabled && value.length > userInput.length) {
+      const currentTargetWord = words[wordIndex] || '';
+      const lastChar = value[value.length - 1];
+      const isCorrect = lastChar === currentTargetWord[value.length - 1];
+      playKeyClickSound(!isCorrect);
+    }
+
     setKeystrokesCount(prev => prev + 1);
     setUserInput(value);
-  }, [status, startTest]);
+  }, [status, startTest, soundEnabled, userInput.length, words, wordIndex]);
 
   // Calculate live elapsed seconds
   const elapsedSeconds = status === 'idle' 

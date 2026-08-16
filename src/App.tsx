@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Page } from './types';
 import { useTheme } from './hooks/useTheme';
 import { useTypingEngine } from './hooks/useTypingEngine';
@@ -13,12 +13,23 @@ export const App: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const engine = useTypingEngine();
 
+  const handleNavigate = useCallback((page: Page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   // Global keyboard shortcuts (e.g. Tab + Enter or Esc to restart)
   useEffect(() => {
     let tabPressed = false;
     let tabTimeout: ReturnType<typeof setTimeout> | null = null;
 
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      // Don't intercept if user is inside a form input
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') && target.getAttribute('aria-label') !== 'Typing test input arena') {
+        return;
+      }
+
       if (e.key === 'Escape') {
         e.preventDefault();
         engine.restartTest(true);
@@ -46,26 +57,26 @@ export const App: React.FC = () => {
   }, [engine]);
 
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-slate-50 text-slate-900 dark:bg-[#0c1017] dark:text-slate-100 transition-colors duration-200">
+    <div className="min-h-screen flex flex-col justify-between bg-slate-50 text-slate-900 dark:bg-[#090d16] dark:text-slate-100 transition-colors duration-300">
       {/* Header */}
       <Header
         currentPage={currentPage}
-        onNavigate={(p) => setCurrentPage(p)}
+        onNavigate={handleNavigate}
         theme={theme}
         onToggleTheme={toggleTheme}
         soundEnabled={engine.soundEnabled}
         onToggleSound={() => engine.setSoundEnabled(!engine.soundEnabled)}
       />
 
-      {/* Main Content Area */}
-      <main className="flex-grow flex flex-col justify-center">
+      {/* Main Content Area with Smooth Page Transition */}
+      <main className="flex-grow flex flex-col justify-center animate-fade-in">
         {currentPage === 'test' && <Home engine={engine} />}
         {currentPage === 'leaderboard' && <Leaderboard userStats={engine.userStats} />}
         {currentPage === 'about' && <About />}
       </main>
 
       {/* Footer */}
-      <Footer onNavigate={(p) => setCurrentPage(p)} />
+      <Footer onNavigate={handleNavigate} />
     </div>
   );
 };

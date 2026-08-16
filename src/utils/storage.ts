@@ -96,7 +96,12 @@ export function getStoredSettings(): StoredSettings {
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
     if (!raw) return DEFAULT_SETTINGS;
-    return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+    const parsed = JSON.parse(raw);
+    return {
+      duration: [15, 30, 60, 120].includes(parsed.duration) ? parsed.duration : 60,
+      difficulty: ['easy', 'medium', 'hard'].includes(parsed.difficulty) ? parsed.difficulty : 'medium',
+      soundEnabled: typeof parsed.soundEnabled === 'boolean' ? parsed.soundEnabled : true
+    };
   } catch {
     return DEFAULT_SETTINGS;
   }

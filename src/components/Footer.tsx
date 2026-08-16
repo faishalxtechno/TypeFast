@@ -1,5 +1,5 @@
 import React from 'react';
-import { Zap, Keyboard, Sparkles } from 'lucide-react';
+import { Zap, Mail, ArrowUpRight } from 'lucide-react';
 import { Page } from '../types';
 
 interface FooterProps {
@@ -8,69 +8,96 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   return (
-    <footer className="w-full mt-20 border-t border-slate-200 dark:border-slate-800/80 bg-white/50 dark:bg-[#0c1017]/80 backdrop-blur-sm transition-colors py-10">
+    <footer id="footer" className="w-full mt-24 border-t border-slate-200/80 dark:border-slate-800/80 bg-white/70 dark:bg-[#090d16]/90 backdrop-blur-md transition-colors pt-14 pb-10">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          {/* Brand Info */}
-          <div className="flex flex-col items-center md:items-start text-center md:text-left">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-brand-500 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-14">
+          {/* Brand Column */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-emerald-600 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
                 <Zap className="w-4 h-4 fill-white" />
               </div>
-              <span className="font-extrabold text-lg tracking-tight text-slate-900 dark:text-white">
+              <span className="font-extrabold text-xl tracking-tight text-slate-900 dark:text-white">
                 Type<span className="text-brand-500">Fast</span>
               </span>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            <p className="text-sm font-semibold text-brand-600 dark:text-brand-400">
               Type Faster. Type Smarter.
+            </p>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed max-w-sm">
+              Test your typing speed, improve your accuracy, and become a faster typist.
             </p>
           </div>
 
-          {/* Shortcut Badges */}
-          <div className="hidden lg:flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-900/80 px-4 py-2 rounded-2xl border border-slate-200 dark:border-slate-800">
-            <Keyboard className="w-4 h-4 text-brand-500" />
-            <div className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 font-mono border border-slate-200 dark:border-slate-700">Tab</kbd>
-              <span>+</span>
-              <kbd className="px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 font-mono border border-slate-200 dark:border-slate-700">Enter</kbd>
-              <span className="ml-1">Restart</span>
-            </div>
-            <span className="text-slate-300 dark:text-slate-700">•</span>
-            <div className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 font-mono border border-slate-200 dark:border-slate-700">Esc</kbd>
-              <span className="ml-1">Reset</span>
-            </div>
+          {/* Quick Links Column */}
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">
+              Quick Links
+            </h4>
+            <ul className="space-y-2.5 text-sm font-medium text-slate-600 dark:text-slate-400">
+              <li>
+                <button
+                  onClick={() => onNavigate('test')}
+                  className="btn-interactive hover:text-brand-500 dark:hover:text-brand-400 transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Test</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('leaderboard')}
+                  className="btn-interactive hover:text-brand-500 dark:hover:text-brand-400 transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Leaderboard</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('about')}
+                  className="btn-interactive hover:text-brand-500 dark:hover:text-brand-400 transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  <span>About</span>
+                </button>
+              </li>
+              <li>
+                <a
+                  href="mailto:connectwithfaishal@gmail.com"
+                  className="btn-interactive hover:text-brand-500 dark:hover:text-brand-400 transition-colors inline-flex items-center gap-1"
+                >
+                  <span>Contact</span>
+                  <ArrowUpRight className="w-3.5 h-3.5 opacity-60" />
+                </a>
+              </li>
+            </ul>
           </div>
 
-          {/* Navigation Links */}
-          <div className="flex items-center gap-6 text-sm text-slate-600 dark:text-slate-400">
-            <button
-              onClick={() => onNavigate('test')}
-              className="hover:text-brand-500 transition-colors"
+          {/* Contact Column */}
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">
+              Contact
+            </h4>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mb-3">
+              Have feedback, questions, or ideas to share? Reach out anytime:
+            </p>
+            <a
+              href="mailto:connectwithfaishal@gmail.com"
+              className="btn-interactive inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/80 hover:bg-brand-50 dark:hover:bg-brand-950/30 text-slate-800 dark:text-slate-200 hover:text-brand-600 dark:hover:text-brand-400 border border-slate-200 dark:border-slate-700/80 text-xs sm:text-sm font-semibold transition-all shadow-sm"
             >
-              Test
-            </button>
-            <button
-              onClick={() => onNavigate('leaderboard')}
-              className="hover:text-brand-500 transition-colors"
-            >
-              Leaderboard
-            </button>
-            <button
-              onClick={() => onNavigate('about')}
-              className="hover:text-brand-500 transition-colors"
-            >
-              About
-            </button>
+              <Mail className="w-4 h-4 text-brand-500" />
+              <span>connectwithfaishal@gmail.com</span>
+            </a>
           </div>
         </div>
 
-        <div className="mt-8 pt-6 border-t border-slate-200/60 dark:border-slate-800/60 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 dark:text-slate-400 gap-3">
-          <p>© {new Date().getFullYear()} TypeFast. All rights reserved.</p>
-          <p className="flex items-center gap-1">
-            Built for typing enthusiasts & developers with
-            <Sparkles className="w-3.5 h-3.5 text-brand-500" />
-          </p>
+        {/* Founder Credit & Copyright Divider */}
+        <div className="mt-12 pt-8 border-t border-slate-200/80 dark:border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
+          <div className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+            <span>Founded & Developed by Mr. Faishal Naushad</span>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <p>© 2026 TypeFast. All rights reserved.</p>
+          </div>
         </div>
       </div>
     </footer>

@@ -25,17 +25,17 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ userStats }) => {
           <Trophy className="w-4 h-4" />
           <span>Hall of Fame</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+        <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
           TypeFast Leaderboard
         </h1>
         <p className="mt-2 text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-lg mx-auto">
           See how you stack up against the fastest typists around the globe.
         </p>
 
-        {/* Coming Soon Notice Banner */}
+        {/* Global Multiplayer Coming Soon Banner */}
         <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-brand-500/10 border border-brand-500/30 text-brand-600 dark:text-brand-400 text-xs sm:text-sm font-semibold">
           <Radio className="w-4 h-4 animate-pulse text-brand-500" />
-          <span>Online leaderboard coming soon. Global multiplayer battles in development!</span>
+          <span>Online multiplayer races & global ranks in active development!</span>
         </div>
       </div>
 
@@ -47,7 +47,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ userStats }) => {
               <Users className="w-6 h-6" />
             </div>
             <div>
-              <div className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 Your Local Ranking
               </div>
               <div className="text-lg font-bold text-slate-900 dark:text-white">
@@ -62,7 +62,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ userStats }) => {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <span className="px-3 py-1 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 shadow-sm">
+            <span className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 shadow-sm">
               {userStats.testsCompleted} Tests Completed
             </span>
           </div>
@@ -70,20 +70,20 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ userStats }) => {
       </div>
 
       {/* Filters Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6 p-4 rounded-2xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 backdrop-blur-sm">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6 p-4 rounded-2xl bg-white/80 dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800/90 backdrop-blur-sm">
         <div className="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-          <Filter className="w-4 h-4" />
+          <Filter className="w-4 h-4 text-brand-500" />
           <span>Filters</span>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-3">
           {/* Duration Filter */}
-          <div className="flex items-center bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200/50 dark:border-slate-800/50 text-xs font-medium">
+          <div className="flex items-center bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200/60 dark:border-slate-800/60 text-xs font-medium">
             <button
               onClick={() => setFilterDuration('all')}
-              className={`px-2.5 py-1 rounded-lg transition-colors ${
+              className={`btn-interactive px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
                 filterDuration === 'all'
-                  ? 'bg-brand-500 text-white font-bold'
+                  ? 'bg-brand-500 text-white font-bold shadow-sm'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
@@ -93,9 +93,9 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ userStats }) => {
               <button
                 key={d}
                 onClick={() => setFilterDuration(d)}
-                className={`px-2.5 py-1 rounded-lg transition-colors ${
+                className={`btn-interactive px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
                   filterDuration === d
-                    ? 'bg-brand-500 text-white font-bold'
+                    ? 'bg-brand-500 text-white font-bold shadow-sm'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
@@ -105,14 +105,14 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ userStats }) => {
           </div>
 
           {/* Difficulty Filter */}
-          <div className="flex items-center bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200/50 dark:border-slate-800/50 text-xs font-medium">
+          <div className="flex items-center bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200/60 dark:border-slate-800/60 text-xs font-medium">
             {['all', 'easy', 'medium', 'hard'].map((diff) => (
               <button
                 key={diff}
                 onClick={() => setFilterDifficulty(diff)}
-                className={`px-2.5 py-1 rounded-lg capitalize transition-colors ${
+                className={`btn-interactive px-2.5 py-1 rounded-lg capitalize transition-colors cursor-pointer ${
                   filterDifficulty === diff
-                    ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold'
+                    ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-bold shadow-sm'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
@@ -128,7 +128,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ userStats }) => {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/75 dark:bg-slate-950/50 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 <th className="py-4 px-4 sm:px-6 w-16 text-center">Rank</th>
                 <th className="py-4 px-4 sm:px-6">Player</th>
                 <th className="py-4 px-4 sm:px-6 text-right">WPM</th>
