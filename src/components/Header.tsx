@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Keyboard, Trophy, Info, Github, Volume2, VolumeX, Menu, X, Zap, Mail } from 'lucide-react';
+import { Keyboard, Trophy, Info, Github, Volume2, VolumeX, Menu, X, Zap, Mail, Award } from 'lucide-react';
 import { Page, Theme } from '../types';
 import { ThemeToggle } from './ThemeToggle';
 
@@ -24,6 +24,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   const navItems: { id: Page; label: string; icon: React.ReactNode }[] = [
     { id: 'test', label: 'Test', icon: <Keyboard className="w-4 h-4" /> },
+    { id: 'certificate', label: 'Certificates', icon: <Award className="w-4 h-4" /> },
     { id: 'leaderboard', label: 'Leaderboard', icon: <Trophy className="w-4 h-4" /> },
     { id: 'about', label: 'About', icon: <Info className="w-4 h-4" /> },
   ];

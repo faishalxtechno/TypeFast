@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Trophy, Target, CheckCircle, Clock, Trash2, TrendingUp, History } from 'lucide-react';
 import { UserStats } from '../types';
 import { clearUserStats } from '../utils/storage';
@@ -9,11 +9,12 @@ interface PersonalStatsProps {
 }
 
 export const PersonalStats: React.FC<PersonalStatsProps> = ({ stats, onStatsCleared }) => {
+  const [confirmReset, setConfirmReset] = useState<boolean>(false);
+
   const handleClear = () => {
-    if (window.confirm('Are you sure you want to reset all your typing statistics?')) {
-      clearUserStats();
-      onStatsCleared();
-    }
+    clearUserStats();
+    onStatsCleared();
+    setConfirmReset(false);
   };
 
   const statCards = [
@@ -68,14 +69,34 @@ export const PersonalStats: React.FC<PersonalStatsProps> = ({ stats, onStatsClea
         </div>
 
         {stats.testsCompleted > 0 && (
-          <button
-            onClick={handleClear}
-            className="btn-interactive flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors px-2.5 py-1 rounded-lg border border-transparent hover:border-rose-500/30 cursor-pointer"
-            title="Clear all saved statistics"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-            <span>Reset Stats</span>
-          </button>
+          <div>
+            {confirmReset ? (
+              <div className="flex items-center gap-1.5 animate-fade-in">
+                <span className="text-xs text-slate-500 dark:text-slate-400">Reset all?</span>
+                <button
+                  onClick={handleClear}
+                  className="btn-interactive px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-xs"
+                >
+                  Yes, Reset
+                </button>
+                <button
+                  onClick={() => setConfirmReset(false)}
+                  className="btn-interactive px-2 py-1 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setConfirmReset(true)}
+                className="btn-interactive flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors px-2.5 py-1 rounded-lg border border-transparent hover:border-rose-500/30 cursor-pointer"
+                title="Clear all saved statistics"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Reset Stats</span>
+              </button>
+            )}
+          </div>
         )}
       </div>
 

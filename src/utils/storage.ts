@@ -1,8 +1,9 @@
-import { UserStats, TestResult, Theme, TestDuration, Difficulty } from '../types';
+import { UserStats, TestResult, Theme, TestDuration, Difficulty, CertificateData } from '../types';
 
 const STATS_KEY = 'typefast_stats';
 const THEME_KEY = 'typefast_theme';
 const SETTINGS_KEY = 'typefast_settings';
+const CERTIFICATES_KEY = 'typefast_certificates';
 
 export interface StoredSettings {
   duration: TestDuration;
@@ -122,4 +123,54 @@ export function clearUserStats(): UserStats {
     console.warn('Failed to clear stats:', e);
   }
   return DEFAULT_STATS;
+}
+
+// -------------------------------------------------------------
+// Certificates Storage Management
+// -------------------------------------------------------------
+
+export function getStoredCertificates(): CertificateData[] {
+  try {
+    const raw = localStorage.getItem(CERTIFICATES_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    console.warn('Failed to load certificates from localStorage:', e);
+    return [];
+  }
+}
+
+export function saveCertificate(cert: CertificateData): void {
+  try {
+    const list = getStoredCertificates();
+    // Prevent duplicates for the same certificate ID or test result ID
+    const filtered = list.filter(c => c.id !== cert.id && c.testResultId !== cert.testResultId);
+    const updated = [cert, ...filtered];
+    localStorage.setItem(CERTIFICATES_KEY, JSON.stringify(updated));
+  } catch (e) {
+    console.warn('Failed to save certificate to localStorage:', e);
+  }
+}
+
+export function getCertificateById(id: string): CertificateData | null {
+  const list = getStoredCertificates();
+  return list.find(c => c.id.toUpperCase() === id.toUpperCase()) || null;
+}
+
+export function getCertificateByTestId(testResultId: string): CertificateData | null {
+  const list = getStoredCertificates();
+  return list.find(c => c.testResultId === testResultId) || null;
+}
+
+export function deleteCertificate(id: string): CertificateData[] {
+  try {
+    const list = getStoredCertificates();
+    const updated = list.filter(c => c.id !== id);
+    localStorage.setItem(CERTIFICATES_KEY, JSON.stringify(updated));
+    return updated;
+  } catch (e) {
+    console.warn('Failed to delete certificate:', e);
+    return [];
+  }
 }

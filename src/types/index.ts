@@ -1,6 +1,6 @@
 export type TestDuration = 15 | 30 | 60 | 120;
 export type Difficulty = 'easy' | 'medium' | 'hard';
-export type Page = 'test' | 'leaderboard' | 'about';
+export type Page = 'test' | 'leaderboard' | 'about' | 'certificate';
 export type Theme = 'dark' | 'light';
 
 export type CharStatus = 'untyped' | 'correct' | 'incorrect' | 'current';
@@ -49,4 +49,18 @@ export interface LeaderboardEntry {
   difficulty: Difficulty;
   date: string;
   badge?: 'diamond' | 'master' | 'pro' | 'rising';
+}
+
+export interface CertificateData {
+  id: string; // e.g. "TF-2026-8A72F4"
+  name: string;
+  wpm: number;
+  rawWpm: number;
+  accuracy: number;
+  errors: number;
+  duration: TestDuration;
+  difficulty: Difficulty;
+  date: string;
+  timestamp: number;
+  testResultId: string;
 }

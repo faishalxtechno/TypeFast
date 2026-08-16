@@ -7,14 +7,46 @@ import { Footer } from './components/Footer';
 import { Home } from './pages/Home';
 import { Leaderboard } from './pages/Leaderboard';
 import { About } from './pages/About';
+import { CertificatePage } from './pages/CertificatePage';
 
 export const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('test');
+  const [activeCertificateId, setActiveCertificateId] = useState<string | null>(null);
   const { theme, toggleTheme } = useTheme();
   const engine = useTypingEngine();
 
-  const handleNavigate = useCallback((page: Page) => {
+  // Listen to URL hash changes e.g. #/certificate/TF-2026-8A72F4
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.toLowerCase();
+      if (hash.startsWith('#/certificate')) {
+        const parts = window.location.hash.split('/');
+        if (parts.length >= 3 && parts[2]) {
+          setActiveCertificateId(parts[2]);
+        }
+        setCurrentPage('certificate');
+      } else if (hash === '#/leaderboard') {
+        setCurrentPage('leaderboard');
+      } else if (hash === '#/about') {
+        setCurrentPage('about');
+      } else if (hash === '#/test' || hash === '' || hash === '#') {
+        setCurrentPage('test');
+      }
+    };
+
+    handleHashChange();
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  const handleNavigate = useCallback((page: Page, certId?: string) => {
     setCurrentPage(page);
+    if (certId) {
+      setActiveCertificateId(certId);
+      window.location.hash = `#/certificate/${certId}`;
+    } else {
+      window.location.hash = `#/${page}`;
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
@@ -71,6 +103,12 @@ export const App: React.FC = () => {
       {/* Main Content Area with Smooth Page Transition */}
       <main className="flex-grow flex flex-col justify-center animate-fade-in">
         {currentPage === 'test' && <Home engine={engine} />}
+        {currentPage === 'certificate' && (
+          <CertificatePage
+            initialCertificateId={activeCertificateId}
+            onNavigate={handleNavigate}
+          />
+        )}
         {currentPage === 'leaderboard' && <Leaderboard userStats={engine.userStats} />}
         {currentPage === 'about' && <About />}
       </main>

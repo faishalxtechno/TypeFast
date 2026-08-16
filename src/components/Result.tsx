@@ -1,8 +1,28 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import confetti from 'canvas-confetti';
-import { RotateCcw, Trophy, Zap, Target, AlertCircle, Clock, Award, CheckCircle2, XCircle, BarChart2 } from 'lucide-react';
-import { TestResult, UserStats } from '../types';
+import {
+  RotateCcw,
+  Trophy,
+  Zap,
+  Target,
+  AlertCircle,
+  Clock,
+  Award,
+  CheckCircle2,
+  XCircle,
+  BarChart2,
+  Sparkles,
+  Download,
+  Printer,
+  Share2,
+  Eye,
+  Check
+} from 'lucide-react';
+import { TestResult, UserStats, CertificateData } from '../types';
 import { getSpeedFeedback } from '../utils/typingCalculations';
+import { createCertificate, sanitizeName, downloadCertificatePNG, printCertificate, shareCertificate } from '../utils/certificate';
+import { getCertificateByTestId, saveCertificate } from '../utils/storage';
+import { CertificateModal } from './CertificateModal';
 
 interface ResultProps {
   result: TestResult;
@@ -12,6 +32,24 @@ interface ResultProps {
 
 export const Result: React.FC<ResultProps> = ({ result, userStats, onRestart }) => {
   const feedback = getSpeedFeedback(result.wpm, result.accuracy);
+
+  // Certificate state
+  const [generateCertEnabled, setGenerateCertEnabled] = useState<boolean>(false);
+  const [recipientName, setRecipientName] = useState<string>('');
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [certificate, setCertificate] = useState<CertificateData | null>(() => getCertificateByTestId(result.id));
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    // If certificate was previously created for this test, automatically enable toggle
+    const existing = getCertificateByTestId(result.id);
+    if (existing) {
+      setCertificate(existing);
+      setRecipientName(existing.name);
+      setGenerateCertEnabled(true);
+    }
+  }, [result.id]);
 
   useEffect(() => {
     // Fire festive celebratory confetti on achievements
@@ -29,8 +67,69 @@ export const Result: React.FC<ResultProps> = ({ result, userStats, onRestart }) 
     }
   }, [result]);
 
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 3000);
+  };
+
+  const handleGenerateCertificate = (e: React.FormEvent) => {
+    e.preventDefault();
+    const clean = sanitizeName(recipientName);
+
+    if (!clean || clean.length === 0) {
+      setNameError('Please enter your name to generate your certificate.');
+      return;
+    }
+
+    if (clean.length < 2) {
+      setNameError('Name must be at least 2 characters.');
+      return;
+    }
+
+    setNameError(null);
+
+    // Reuse existing certificate if already generated for this test, or create new
+    let certToUse = getCertificateByTestId(result.id);
+    if (!certToUse || certToUse.name !== clean) {
+      certToUse = createCertificate(result, clean);
+      saveCertificate(certToUse);
+    }
+
+    setCertificate(certToUse);
+    setIsModalOpen(true);
+  };
+
+  const handleDownloadPNG = () => {
+    if (!certificate) return;
+    downloadCertificatePNG(certificate);
+    showToast('PNG Downloaded!');
+  };
+
+  const handlePrint = () => {
+    printCertificate();
+  };
+
+  const handleShare = async () => {
+    if (!certificate) return;
+    const res = await shareCertificate(certificate);
+    if (res.method === 'clipboard') {
+      showToast('Certificate details copied to clipboard!');
+    } else {
+      showToast('Certificate shared!');
+    }
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto animate-slide-up">
+      {/* Certificate Modal Dialog */}
+      <CertificateModal
+        certificate={certificate}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
+
       <div className="bg-white/95 dark:bg-slate-900/90 rounded-3xl border-2 border-slate-200/90 dark:border-slate-800/90 shadow-2xl p-6 sm:p-10 overflow-hidden relative backdrop-blur-xl">
         {/* Background decorative ambient glows */}
         <div className="absolute top-0 right-0 -mt-16 -mr-16 w-72 h-72 bg-brand-500/15 rounded-full blur-3xl pointer-events-none" />
@@ -182,12 +281,173 @@ export const Result: React.FC<ResultProps> = ({ result, userStats, onRestart }) 
           </div>
         </div>
 
-        {/* Action Button */}
+        {/* ------------------------------------------------------------- */}
+        {/* Certificate Generation Section with Modern Toggle Switch */}
+        {/* ------------------------------------------------------------- */}
+        <div className="mb-8 p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-brand-500/10 via-emerald-500/5 to-cyan-500/10 border-2 border-brand-500/30 relative z-10 shadow-sm transition-all">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-2xl bg-brand-500 text-white flex items-center justify-center shadow-lg shadow-brand-500/30 flex-shrink-0">
+                <Sparkles className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <span>Generate Certificate</span>
+                  {certificate && (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                      <Check className="w-3 h-3" />
+                      Generated
+                    </span>
+                  )}
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+                  Claim an official verifiable achievement certificate for this typing session.
+                </p>
+              </div>
+            </div>
+
+            {/* Toggle Switch */}
+            <div className="flex items-center gap-2.5 self-start sm:self-center">
+              <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                {generateCertEnabled ? 'ON' : 'OFF'}
+              </span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={generateCertEnabled}
+                onClick={() => setGenerateCertEnabled(!generateCertEnabled)}
+                className={`relative inline-flex h-7 w-13 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 ${
+                  generateCertEnabled ? 'bg-brand-500' : 'bg-slate-300 dark:bg-slate-700'
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                    generateCertEnabled ? 'translate-x-6' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+          </div>
+
+          {/* Form & Actions revealed when Toggle is ON */}
+          {generateCertEnabled && (
+            <div className="mt-5 pt-5 border-t border-brand-500/20 animate-fade-in space-y-4">
+              {!certificate ? (
+                /* Name input form before certificate generation */
+                <form onSubmit={handleGenerateCertificate} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <div className="flex-grow">
+                    <label htmlFor="recipient-name" className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                      Your Name on Certificate
+                    </label>
+                    <input
+                      id="recipient-name"
+                      type="text"
+                      value={recipientName}
+                      onChange={(e) => {
+                        setRecipientName(e.target.value);
+                        if (nameError) setNameError(null);
+                      }}
+                      placeholder="e.g. Faishal Naushad"
+                      maxLength={50}
+                      className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-medium text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 shadow-xs"
+                      required
+                    />
+                    {nameError && (
+                      <p className="text-xs text-rose-500 font-semibold mt-1">
+                        {nameError}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="sm:self-end">
+                    <button
+                      type="submit"
+                      className="btn-interactive w-full sm:w-auto px-6 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm shadow-md shadow-brand-500/25 flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      <span>Get Your Certificate</span>
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                /* Certificate has been generated: reveal View / Download / Share buttons */
+                <div className="space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-2xl bg-white/80 dark:bg-slate-950/60 border border-brand-500/30">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
+                      <Award className="w-4 h-4 text-brand-500" />
+                      <span>
+                        Certificate Issued to <span className="font-bold text-brand-600 dark:text-brand-400">{certificate.name}</span>
+                      </span>
+                      <span className="font-mono text-xs text-slate-500">
+                        ({certificate.id})
+                      </span>
+                    </div>
+
+                    <button
+                      onClick={() => setCertificate(null)}
+                      className="text-xs text-slate-500 hover:text-brand-500 underline text-left sm:text-right"
+                    >
+                      Change Name
+                    </button>
+                  </div>
+
+                  {/* Actions Grid */}
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    {/* View Certificate */}
+                    <button
+                      onClick={() => setIsModalOpen(true)}
+                      className="btn-interactive flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs sm:text-sm shadow-md shadow-brand-500/25 cursor-pointer"
+                    >
+                      <Eye className="w-4 h-4" />
+                      <span>View Certificate</span>
+                    </button>
+
+                    {/* Download PNG */}
+                    <button
+                      onClick={handleDownloadPNG}
+                      className="btn-interactive flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 font-semibold text-xs sm:text-sm border border-slate-200 dark:border-slate-700 shadow-xs cursor-pointer"
+                    >
+                      <Download className="w-4 h-4 text-brand-500" />
+                      <span>Download PNG</span>
+                    </button>
+
+                    {/* Print / Save PDF */}
+                    <button
+                      onClick={handlePrint}
+                      className="btn-interactive flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 font-semibold text-xs sm:text-sm border border-slate-200 dark:border-slate-700 shadow-xs cursor-pointer"
+                    >
+                      <Printer className="w-4 h-4 text-purple-500" />
+                      <span>Print / PDF</span>
+                    </button>
+
+                    {/* Share */}
+                    <button
+                      onClick={handleShare}
+                      className="btn-interactive flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 font-semibold text-xs sm:text-sm border border-slate-200 dark:border-slate-700 shadow-xs cursor-pointer"
+                    >
+                      <Share2 className="w-4 h-4 text-cyan-500" />
+                      <span>Share</span>
+                    </button>
+                  </div>
+
+                  {toastMessage && (
+                    <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                      <Check className="w-3.5 h-3.5" />
+                      <span>{toastMessage}</span>
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Action Button: Restart Test */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 relative z-10">
           <button
             onClick={onRestart}
             autoFocus
-            className="btn-interactive w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-base shadow-lg shadow-brand-500/25 cursor-pointer focus:outline-none focus:ring-4 focus:ring-brand-500/40"
+            className="btn-interactive w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-base shadow-lg cursor-pointer focus:outline-none focus:ring-4 focus:ring-brand-500/40"
           >
             <RotateCcw className="w-5 h-5" />
             <span>Restart Test</span>
