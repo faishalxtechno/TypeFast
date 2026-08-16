@@ -13,6 +13,7 @@ import { getAnalyticsSummary } from '../services/testService';
 import { Stats } from '../components/Stats';
 import { TypingTest } from '../components/TypingTest';
 import { useTypingEngine } from '../hooks/useTypingEngine';
+import { PopIn } from '../components/animations/PopIn';
 
 interface PracticePageProps {
   onNavigate: (page: Page) => void;
@@ -89,9 +90,9 @@ export const PracticePage: React.FC<PracticePageProps> = ({ onNavigate }) => {
   ];
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 animate-fade-in space-y-10">
-      {/* Header */}
-      <div className="text-center pt-2">
+    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 space-y-10">
+      {/* Header (PopIn 0ms) */}
+      <PopIn delay={0} className="text-center pt-2">
         <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/25 text-brand-600 dark:text-brand-400 text-xs sm:text-sm font-bold uppercase tracking-wider mb-4">
           <Sparkles className="w-4 h-4 text-brand-500" />
           <span>Targeted Conditioning</span>
@@ -102,10 +103,10 @@ export const PracticePage: React.FC<PracticePageProps> = ({ onNavigate }) => {
         <p className="mt-4 text-base sm:text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
           Custom drills automatically generated from your weakest keystrokes, transitions, and error patterns.
         </p>
-      </div>
+      </PopIn>
 
-      {/* Mode Selection Pills */}
-      <div className="flex flex-wrap items-center justify-center gap-2.5 p-2 rounded-2xl bg-white/70 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 backdrop-blur-sm max-w-2xl mx-auto">
+      {/* Mode Selection Pills (PopIn 60ms) */}
+      <PopIn delay={60} className="flex flex-wrap items-center justify-center gap-2.5 p-2 rounded-2xl bg-white/70 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 backdrop-blur-sm max-w-2xl mx-auto">
         {modesList.map(m => (
           <button
             key={m.id}
@@ -119,10 +120,10 @@ export const PracticePage: React.FC<PracticePageProps> = ({ onNavigate }) => {
             {m.label}
           </button>
         ))}
-      </div>
+      </PopIn>
 
-      {/* Target Focus Keys Banner */}
-      <div className="flex items-center justify-center gap-3 text-xs font-semibold text-slate-600 dark:text-slate-400">
+      {/* Target Focus Keys Banner (PopIn 100ms) */}
+      <PopIn delay={100} className="flex items-center justify-center gap-3 text-xs font-semibold text-slate-600 dark:text-slate-400">
         <span>Target Focus Areas:</span>
         <div className="flex items-center gap-1.5">
           {practiceSession.targetKeys.map(k => (
@@ -134,11 +135,11 @@ export const PracticePage: React.FC<PracticePageProps> = ({ onNavigate }) => {
             </span>
           ))}
         </div>
-      </div>
+      </PopIn>
 
       {/* Practice View States */}
       {!hasStarted ? (
-        <div className="p-8 sm:p-12 rounded-3xl bg-white/90 dark:bg-slate-900/85 border-2 border-brand-500/30 shadow-2xl backdrop-blur-xl text-center space-y-6">
+        <PopIn delay={140} className="p-8 sm:p-12 rounded-3xl bg-white/90 dark:bg-slate-900/85 border-2 border-brand-500/30 shadow-2xl backdrop-blur-xl text-center space-y-6">
           <div className="text-xs font-bold uppercase tracking-wider text-slate-500">
             Preview Drill Passage
           </div>
@@ -154,10 +155,10 @@ export const PracticePage: React.FC<PracticePageProps> = ({ onNavigate }) => {
             <Play className="w-5 h-5 fill-white" />
             <span>Begin Targeted Drill</span>
           </button>
-        </div>
+        </PopIn>
       ) : completedResult ? (
         /* Practice Completed Comparison Card */
-        <div className="p-8 sm:p-12 rounded-3xl bg-white/95 dark:bg-slate-900/90 border-2 border-emerald-500/40 shadow-2xl backdrop-blur-xl text-center space-y-8 animate-scale-in">
+        <div className="p-8 sm:p-12 rounded-3xl bg-white/95 dark:bg-slate-900/90 border-2 border-emerald-500/40 shadow-2xl backdrop-blur-xl text-center space-y-8 animate-card-pop">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-bold text-sm">
             <CheckCircle2 className="w-4 h-4" />
             <span>Practice Complete! Muscle Memory Conditioned</span>
@@ -223,7 +224,7 @@ export const PracticePage: React.FC<PracticePageProps> = ({ onNavigate }) => {
         </div>
       ) : (
         /* In-Progress Practice Arena */
-        <div className="space-y-6 animate-fade-in">
+        <div className="space-y-6">
           <Stats
             timeLeft={engine.timeLeft}
             wpm={engine.liveWpm}

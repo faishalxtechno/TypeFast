@@ -47,7 +47,7 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({ onSelectKey, c
   };
 
   return (
-    <div className={`p-6 sm:p-8 rounded-3xl bg-white/90 dark:bg-slate-900/85 border border-slate-200 dark:border-slate-800 shadow-xl backdrop-blur-md space-y-6 ${className}`}>
+    <div className={`p-6 sm:p-8 rounded-3xl bg-white/90 dark:bg-slate-900/85 border border-slate-200 dark:border-slate-800 shadow-xl backdrop-blur-md space-y-6 animate-card-pop ${className}`}>
       {/* Header with Heatmap Filter Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -122,7 +122,7 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({ onSelectKey, c
                     onClick={() => onSelectKey && onSelectKey(char)}
                     onMouseEnter={() => setHoveredKey(stat || { key: char, attempts: 0, correct: 0, incorrect: 0, accuracy: 100, mistakesAgainst: {} })}
                     onMouseLeave={() => setHoveredKey(null)}
-                    className={`btn-interactive relative flex flex-col items-center justify-center w-11 sm:w-14 h-12 sm:h-14 rounded-xl border font-mono shadow-xs transition-all cursor-pointer ${colorClasses}`}
+                    className={`relative flex flex-col items-center justify-center w-11 sm:w-14 h-12 sm:h-14 rounded-xl border font-mono shadow-xs transition-all duration-150 hover:scale-105 active:scale-95 cursor-pointer ${colorClasses}`}
                   >
                     <span className="text-sm sm:text-base font-black">{char}</span>
                     <span className="text-[9px] sm:text-[10px] font-semibold opacity-90">

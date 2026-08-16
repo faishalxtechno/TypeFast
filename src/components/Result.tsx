@@ -25,6 +25,8 @@ import { getCertificateByTestId, saveCertificate } from '../utils/storage';
 import { CertificateModal } from './CertificateModal';
 import { generateAICoachAnalysis } from '../services/aiCoachService';
 import { awardXp, getLevelInfo } from '../services/xpService';
+import { PopIn } from './animations/PopIn';
+import { StaggerItem } from './animations/StaggerItem';
 
 interface ResultProps {
   result: TestResult;
@@ -110,7 +112,7 @@ export const Result: React.FC<ResultProps> = ({ result, onRestart, onNavigate })
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto rounded-3xl bg-white/90 dark:bg-[#0c1220]/90 border border-slate-200/90 dark:border-slate-800/90 shadow-2xl backdrop-blur-xl p-6 sm:p-10 space-y-8 animate-scale-in">
+    <div className="w-full max-w-3xl mx-auto rounded-3xl bg-white/90 dark:bg-[#0c1220]/90 border border-slate-200/90 dark:border-slate-800/90 shadow-2xl backdrop-blur-xl p-6 sm:p-10 space-y-8 animate-card-pop">
       {/* Certificate Modal Dialog */}
       <CertificateModal
         certificate={certificate}
@@ -121,64 +123,72 @@ export const Result: React.FC<ResultProps> = ({ result, onRestart, onNavigate })
       {/* Header Banner */}
       <div className="text-center space-y-2">
         <div className="flex flex-wrap items-center justify-center gap-2 mb-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-600 dark:text-brand-400 text-xs font-bold uppercase tracking-wider">
-            <BarChart2 className="w-3.5 h-3.5" />
-            <span>Test Completed</span>
-          </div>
+          <PopIn delay={40}>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-600 dark:text-brand-400 text-xs font-bold uppercase tracking-wider">
+              <BarChart2 className="w-3.5 h-3.5" />
+              <span>Test Completed</span>
+            </div>
+          </PopIn>
 
-          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold uppercase tracking-wider">
-            <Zap className="w-3.5 h-3.5 fill-amber-500" />
-            <span>+{xpAwarded} XP Earned</span>
-          </div>
+          <PopIn delay={80}>
+            <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold uppercase tracking-wider">
+              <Zap className="w-3.5 h-3.5 fill-amber-500" />
+              <span>+{xpAwarded} XP Earned</span>
+            </div>
+          </PopIn>
 
           {result.isNewBest && (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold uppercase tracking-wider animate-bounce">
-              <Trophy className="w-3.5 h-3.5 text-amber-500" />
-              <span>Personal Best!</span>
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-amber-500/20 border-2 border-amber-500/40 text-amber-600 dark:text-amber-300 text-xs font-black uppercase tracking-wider animate-pb-celebrate">
+              <Trophy className="w-4 h-4 text-amber-500" />
+              <span>🏆 NEW PERSONAL BEST!</span>
             </div>
           )}
         </div>
 
-        <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-          {feedback.tier}
-        </h2>
-        <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-md mx-auto">
-          {feedback.message}
-        </p>
+        <PopIn delay={100}>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            {feedback.tier}
+          </h2>
+          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-md mx-auto mt-1">
+            {feedback.message}
+          </p>
+        </PopIn>
 
         {/* Level XP Progress Mini Bar */}
-        <div className="pt-2 max-w-xs mx-auto">
-          <div className="flex justify-between items-center text-[11px] font-bold text-slate-500 mb-1">
-            <span>Level {levelInfo.level} • {levelInfo.title}</span>
-            <span>{levelInfo.progressPercent}%</span>
+        <PopIn delay={140}>
+          <div className="pt-2 max-w-xs mx-auto">
+            <div className="flex justify-between items-center text-[11px] font-bold text-slate-500 mb-1">
+              <span>Level {levelInfo.level} • {levelInfo.title}</span>
+              <span>{levelInfo.progressPercent}%</span>
+            </div>
+            <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-amber-500 to-brand-500 transition-all duration-500"
+                style={{ width: `${levelInfo.progressPercent}%` }}
+              />
+            </div>
           </div>
-          <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-amber-500 to-brand-500 transition-all duration-500"
-              style={{ width: `${levelInfo.progressPercent}%` }}
-            />
-          </div>
-        </div>
+        </PopIn>
       </div>
 
-      {/* 4 Core Primary Metrics Grid */}
+      {/* 4 Core Primary Metrics Grid with Spring WPM & Stagger */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        {/* Net WPM */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-brand-500/10 border border-brand-500/30 text-center flex flex-col justify-center">
+        {/* Net WPM with Spring animation */}
+        <StaggerItem index={0} className="p-4 sm:p-5 rounded-2xl bg-brand-500/10 border-2 border-brand-500/40 text-center flex flex-col justify-center shadow-lg shadow-brand-500/10">
           <div className="flex items-center justify-center gap-1 text-xs font-bold text-brand-700 dark:text-brand-300 uppercase tracking-wider">
             <Zap className="w-3.5 h-3.5 text-brand-500" />
             <span>Net Speed</span>
           </div>
-          <div className="text-3xl sm:text-4xl font-black font-mono text-brand-600 dark:text-brand-400 mt-1">
+          <div className="text-4xl sm:text-5xl font-black font-mono text-brand-600 dark:text-brand-400 mt-1 animate-number-spring">
             {result.wpm}
           </div>
           <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
             Words Per Minute
           </div>
-        </div>
+        </StaggerItem>
 
         {/* Accuracy */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 text-center flex flex-col justify-center">
+        <StaggerItem index={1} className="p-4 sm:p-5 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 text-center flex flex-col justify-center">
           <div className="flex items-center justify-center gap-1 text-xs font-bold text-cyan-700 dark:text-cyan-300 uppercase tracking-wider">
             <Target className="w-3.5 h-3.5 text-cyan-500" />
             <span>Accuracy</span>
@@ -189,10 +199,10 @@ export const Result: React.FC<ResultProps> = ({ result, onRestart, onNavigate })
           <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
             Precision Rate
           </div>
-        </div>
+        </StaggerItem>
 
         {/* Errors */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-center flex flex-col justify-center">
+        <StaggerItem index={2} className="p-4 sm:p-5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-center flex flex-col justify-center">
           <div className="flex items-center justify-center gap-1 text-xs font-bold text-rose-700 dark:text-rose-300 uppercase tracking-wider">
             <AlertCircle className="w-3.5 h-3.5 text-rose-500" />
             <span>Errors</span>
@@ -203,10 +213,10 @@ export const Result: React.FC<ResultProps> = ({ result, onRestart, onNavigate })
           <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
             Uncorrected
           </div>
-        </div>
+        </StaggerItem>
 
         {/* Duration */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-slate-100/90 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-center flex flex-col justify-center">
+        <StaggerItem index={3} className="p-4 sm:p-5 rounded-2xl bg-slate-100/90 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-center flex flex-col justify-center">
           <div className="flex items-center justify-center gap-1 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
             <Clock className="w-3.5 h-3.5 text-slate-500" />
             <span>Duration</span>
@@ -217,11 +227,11 @@ export const Result: React.FC<ResultProps> = ({ result, onRestart, onNavigate })
           <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium capitalize">
             {result.difficulty} Tier
           </div>
-        </div>
+        </StaggerItem>
       </div>
 
       {/* AI Coach Quick Diagnostic Card */}
-      <div className="p-5 sm:p-6 rounded-3xl bg-slate-50 dark:bg-slate-950/70 border border-brand-500/30 space-y-4">
+      <PopIn delay={220} className="p-5 sm:p-6 rounded-3xl bg-slate-50 dark:bg-slate-950/70 border border-brand-500/30 space-y-4 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400">
             <Sparkles className="w-4 h-4 text-brand-500" />
@@ -255,10 +265,10 @@ export const Result: React.FC<ResultProps> = ({ result, onRestart, onNavigate })
             </button>
           </div>
         )}
-      </div>
+      </PopIn>
 
       {/* Certificate Generation Toggle Section */}
-      <div className="p-5 sm:p-6 rounded-3xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 space-y-5">
+      <PopIn delay={280} className="p-5 sm:p-6 rounded-3xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 space-y-5">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center flex-shrink-0">
@@ -274,18 +284,18 @@ export const Result: React.FC<ResultProps> = ({ result, onRestart, onNavigate })
             </div>
           </div>
 
-          {/* Toggle Switch */}
+          {/* Smooth Toggle Switch */}
           <button
             type="button"
             role="switch"
             aria-checked={generateCertEnabled}
             onClick={() => setGenerateCertEnabled(!generateCertEnabled)}
-            className={`btn-interactive relative inline-flex h-7 w-14 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-500 ${
+            className={`btn-interactive relative inline-flex h-7 w-14 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-250 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-500 ${
               generateCertEnabled ? 'bg-brand-500' : 'bg-slate-300 dark:bg-slate-700'
             }`}
           >
             <span
-              className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+              className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-lg ring-0 toggle-knob ${
                 generateCertEnabled ? 'translate-x-7' : 'translate-x-0'
               }`}
             />
@@ -369,10 +379,10 @@ export const Result: React.FC<ResultProps> = ({ result, onRestart, onNavigate })
             )}
           </div>
         )}
-      </div>
+      </PopIn>
 
       {toastMessage && (
-        <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center justify-center gap-1.5">
+        <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center justify-center gap-1.5 animate-fade-in">
           <Check className="w-4 h-4" />
           <span>{toastMessage}</span>
         </div>

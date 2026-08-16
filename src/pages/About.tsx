@@ -10,7 +10,13 @@ import {
   Brain
 } from 'lucide-react';
 
-export const About: React.FC = () => {
+import { Page } from '../types';
+
+interface AboutProps {
+  onNavigate?: (page: Page) => void;
+}
+
+export const About: React.FC<AboutProps> = () => {
   const highlights = [
     {
       icon: <Brain className="w-5 h-5 text-brand-500" />,

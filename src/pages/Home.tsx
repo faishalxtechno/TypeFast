@@ -16,6 +16,8 @@ import { useTypingEngine } from '../hooks/useTypingEngine';
 import { getUserAchievements } from '../services/achievementService';
 import { getStoredCertificates } from '../utils/storage';
 import { Page } from '../types';
+import { PopIn } from '../components/animations/PopIn';
+import { AnimatedSection } from '../components/animations/AnimatedSection';
 
 interface HomeProps {
   engine: ReturnType<typeof useTypingEngine>;
@@ -28,12 +30,12 @@ export const Home: React.FC<HomeProps> = ({ engine, onNavigate }) => {
   const unlockedBadges = achievements.filter(a => !!a.unlockedAt);
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 animate-fade-in space-y-16">
+    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-16">
       {/* Hero Section */}
-      <section className="text-center pt-2">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-600 dark:text-brand-400 text-xs sm:text-sm font-bold uppercase tracking-wider mb-4 animate-scale-in">
+      <PopIn delay={0} className="text-center pt-2">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-600 dark:text-brand-400 text-xs sm:text-sm font-bold uppercase tracking-wider mb-4">
           <Sparkles className="w-4 h-4 text-brand-500" />
-          <span>TypeFast 4.0 Platform</span>
+          <span>TypeFast 5.0 Platform</span>
         </div>
 
         <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.1]">
@@ -43,10 +45,10 @@ export const Home: React.FC<HomeProps> = ({ engine, onNavigate }) => {
         <p className="mt-5 text-base sm:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
           Improve your speed. Improve your accuracy. Become a better typist with real-time feedback, analytics, streaks, and verified credentials.
         </p>
-      </section>
+      </PopIn>
 
       {/* Main Typing Interactive Arena */}
-      <section id="test-arena" className="w-full max-w-4xl mx-auto space-y-6 scroll-mt-20">
+      <PopIn delay={80} className="w-full max-w-4xl mx-auto space-y-6 scroll-mt-20" id="test-arena">
         {/* Duration & Difficulty Controls Bar */}
         <TestSettings
           duration={engine.duration}
@@ -78,30 +80,31 @@ export const Home: React.FC<HomeProps> = ({ engine, onNavigate }) => {
           onInput={engine.handleInput}
           onRestart={() => engine.restartTest(false)}
         />
-      </section>
+      </PopIn>
 
       {/* Result Card (shown when test completes) */}
       {engine.status === 'completed' && engine.result && (
-        <section className="w-full max-w-4xl mx-auto animate-scale-in">
+        <section className="w-full max-w-4xl mx-auto">
           <Result
             result={engine.result}
             userStats={engine.userStats}
             onRestart={() => engine.restartTest(false)}
+            onNavigate={onNavigate}
           />
         </section>
       )}
 
       {/* Personal Performance Stats */}
-      <section className="w-full max-w-5xl mx-auto">
+      <AnimatedSection className="w-full max-w-5xl mx-auto">
         <PersonalStats
           stats={engine.userStats}
           onStatsCleared={engine.refreshStats}
         />
-      </section>
+      </AnimatedSection>
 
       {/* Homepage Feature Previews Grid */}
       {onNavigate && (
-        <section className="w-full max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
+        <AnimatedSection className="w-full max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
           {/* Daily Challenge Card */}
           <div className="p-6 rounded-3xl bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-transparent border border-amber-500/30 shadow-lg backdrop-blur-md flex flex-col justify-between space-y-4">
             <div>
@@ -193,7 +196,7 @@ export const Home: React.FC<HomeProps> = ({ engine, onNavigate }) => {
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
-        </section>
+        </AnimatedSection>
       )}
     </div>
   );

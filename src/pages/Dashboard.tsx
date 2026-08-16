@@ -22,6 +22,8 @@ import { getStoredCertificates } from '../utils/storage';
 import { getUserAchievements } from '../services/achievementService';
 import { generateAICoachAnalysis } from '../services/aiCoachService';
 import { getLevelInfo } from '../services/xpService';
+import { PopIn } from '../components/animations/PopIn';
+import { StaggerItem } from '../components/animations/StaggerItem';
 
 interface DashboardProps {
   user: UserProfile | null;
@@ -116,90 +118,96 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onNavigate }) => {
   ];
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 animate-fade-in space-y-8">
-      {/* Welcome Banner with Level Bar */}
-      <div className="relative overflow-hidden p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-brand-500/15 via-emerald-500/10 to-cyan-500/15 border border-brand-500/30 shadow-xl backdrop-blur-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-        <div className="relative z-10 space-y-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-500/20 text-brand-700 dark:text-brand-300 font-bold text-xs">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>TypeFast 5.0 Platform</span>
+    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
+      {/* 1. Welcome Banner with Level Bar (PopIn 0ms) */}
+      <PopIn delay={0}>
+        <div className="relative overflow-hidden p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-brand-500/15 via-emerald-500/10 to-cyan-500/15 border border-brand-500/30 shadow-xl backdrop-blur-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="relative z-10 space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-500/20 text-brand-700 dark:text-brand-300 font-bold text-xs">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>TypeFast 5.0 Platform</span>
+              </div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold text-xs">
+                <Zap className="w-3.5 h-3.5 fill-amber-500" />
+                <span>Level {levelInfo.level} • {levelInfo.title}</span>
+              </div>
             </div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold text-xs">
-              <Zap className="w-3.5 h-3.5 fill-amber-500" />
-              <span>Level {levelInfo.level} • {levelInfo.title}</span>
+
+            <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              Welcome back, {displayName} 👋
+            </h1>
+            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-lg">
+              Ready to improve your typing with AI coaching, targeted drills, and streak rewards?
+            </p>
+
+            {/* XP Progress */}
+            <div className="pt-2 max-w-md">
+              <div className="flex justify-between text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                <span>XP Progress</span>
+                <span className="font-mono">{levelInfo.currentLevelXp} / {levelInfo.nextLevelXp} XP ({levelInfo.progressPercent}%)</span>
+              </div>
+              <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-amber-500 via-brand-500 to-emerald-500 transition-all duration-500"
+                  style={{ width: `${levelInfo.progressPercent}%` }}
+                />
+              </div>
             </div>
           </div>
 
-          <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Welcome back, {displayName} 👋
-          </h1>
-          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-lg">
-            Ready to improve your typing with AI coaching, targeted drills, and streak rewards?
-          </p>
-
-          {/* XP Progress */}
-          <div className="pt-2 max-w-md">
-            <div className="flex justify-between text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-              <span>XP Progress</span>
-              <span className="font-mono">{levelInfo.currentLevelXp} / {levelInfo.nextLevelXp} XP ({levelInfo.progressPercent}%)</span>
-            </div>
-            <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-amber-500 via-brand-500 to-emerald-500 transition-all duration-500"
-                style={{ width: `${levelInfo.progressPercent}%` }}
-              />
-            </div>
+          <div className="relative z-10 flex flex-wrap items-center gap-3">
+            <button
+              onClick={() => onNavigate('test')}
+              className="btn-interactive flex items-center gap-2 px-6 py-3 rounded-2xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm sm:text-base shadow-lg shadow-brand-500/30 cursor-pointer"
+            >
+              <Play className="w-4 h-4 fill-white" />
+              <span>Start Typing Test</span>
+            </button>
+            <button
+              onClick={() => onNavigate('coach')}
+              className="btn-interactive flex items-center gap-2 px-5 py-3 rounded-2xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-bold text-sm border border-slate-200 dark:border-slate-700 shadow-sm cursor-pointer"
+            >
+              <Sparkles className="w-4 h-4 text-brand-500" />
+              <span>AI Coach</span>
+            </button>
           </div>
         </div>
+      </PopIn>
 
-        <div className="relative z-10 flex flex-wrap items-center gap-3">
+      {/* 2. AI Recommendation Highlight Card (PopIn 80ms) */}
+      <PopIn delay={80}>
+        <div className="p-6 rounded-3xl bg-gradient-to-r from-brand-500/10 via-purple-500/10 to-amber-500/10 border-2 border-brand-500/30 shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="space-y-1 max-w-2xl">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400">
+              <Sparkles className="w-4 h-4 text-brand-500" />
+              <span>Your AI Coach Recommendation</span>
+            </div>
+            <p className="text-sm sm:text-base text-slate-800 dark:text-slate-200 font-semibold">
+              {analysis.recommendation}
+            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Primary focus: <strong className="capitalize">{analysis.recommendedMode}</strong> • Weak keys: <span className="font-mono text-rose-500 font-bold">{analysis.weakKeys.join(', ')}</span>
+            </p>
+          </div>
+
           <button
-            onClick={() => onNavigate('test')}
-            className="btn-interactive flex items-center gap-2 px-6 py-3 rounded-2xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm sm:text-base shadow-lg shadow-brand-500/30 cursor-pointer"
+            onClick={() => onNavigate('practice')}
+            className="btn-interactive px-6 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs sm:text-sm shadow-md flex items-center gap-2 flex-shrink-0 cursor-pointer"
           >
-            <Play className="w-4 h-4 fill-white" />
-            <span>Start Typing Test</span>
-          </button>
-          <button
-            onClick={() => onNavigate('coach')}
-            className="btn-interactive flex items-center gap-2 px-5 py-3 rounded-2xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-bold text-sm border border-slate-200 dark:border-slate-700 shadow-sm cursor-pointer"
-          >
-            <Sparkles className="w-4 h-4 text-brand-500" />
-            <span>AI Coach</span>
+            <span>Start Practice Drill</span>
+            <ArrowRight className="w-4 h-4" />
           </button>
         </div>
-      </div>
+      </PopIn>
 
-      {/* AI Recommendation Highlight Card */}
-      <div className="p-6 rounded-3xl bg-gradient-to-r from-brand-500/10 via-purple-500/10 to-amber-500/10 border-2 border-brand-500/30 shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="space-y-1 max-w-2xl">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400">
-            <Sparkles className="w-4 h-4 text-brand-500" />
-            <span>Your AI Coach Recommendation</span>
-          </div>
-          <p className="text-sm sm:text-base text-slate-800 dark:text-slate-200 font-semibold">
-            {analysis.recommendation}
-          </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Primary focus: <strong className="capitalize">{analysis.recommendedMode}</strong> • Weak keys: <span className="font-mono text-rose-500 font-bold">{analysis.weakKeys.join(', ')}</span>
-          </p>
-        </div>
-
-        <button
-          onClick={() => onNavigate('practice')}
-          className="btn-interactive px-6 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs sm:text-sm shadow-md flex items-center gap-2 flex-shrink-0 cursor-pointer"
-        >
-          <span>Start Practice Drill</span>
-          <ArrowRight className="w-4 h-4" />
-        </button>
-      </div>
-
-      {/* 8 Metric Statistics Grid */}
+      {/* 3. 8 Metric Statistics Grid with Stagger */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 sm:gap-4">
         {statCards.map((card, idx) => (
-          <div
+          <StaggerItem
             key={idx}
+            index={idx}
+            baseDelay={45}
             className={`p-4 sm:p-5 rounded-2xl bg-gradient-to-b ${card.bg} bg-white/80 dark:bg-slate-900/70 border ${card.border} backdrop-blur-md shadow-sm transition-all duration-200 hover:scale-[1.02]`}
           >
             <div className="flex items-center justify-between mb-2">
@@ -214,19 +222,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onNavigate }) => {
             <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-1">
               {card.sub}
             </div>
-          </div>
+          </StaggerItem>
         ))}
       </div>
 
-      {/* Main Charts & Streak Row */}
+      {/* 4. Main Charts & Streak Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Performance Chart (Span 2) */}
-        <div className="lg:col-span-2">
+        <PopIn delay={140} className="lg:col-span-2">
           <PerformanceChart />
-        </div>
+        </PopIn>
 
         {/* Streak Calendar & Achievements Mini-Widget (Span 1) */}
-        <div className="space-y-6">
+        <PopIn delay={180} className="space-y-6">
           <StreakCalendar onStartChallenge={() => onNavigate('daily-challenge')} />
 
           {/* Achievements Preview Card */}
@@ -275,13 +283,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onNavigate }) => {
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
-        </div>
+        </PopIn>
       </div>
 
-      {/* Recent Tests Table & Personal Best Section */}
+      {/* 5. Recent Tests Table & Personal Best Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Tests Table (Span 2) */}
-        <div className="lg:col-span-2 p-5 sm:p-6 rounded-3xl bg-white/90 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 shadow-xl backdrop-blur-md">
+        <PopIn delay={220} className="lg:col-span-2 p-5 sm:p-6 rounded-3xl bg-white/90 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 shadow-xl backdrop-blur-md">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <HistoryIcon className="w-4 h-4 text-brand-500" />
@@ -341,10 +349,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onNavigate }) => {
               </table>
             </div>
           )}
-        </div>
+        </PopIn>
 
         {/* Highlighted Personal Best (Span 1) */}
-        <div className="p-6 rounded-3xl bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-brand-500/15 border-2 border-amber-500/40 shadow-xl flex flex-col justify-between">
+        <PopIn delay={260} className="p-6 rounded-3xl bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-brand-500/15 border-2 border-amber-500/40 shadow-xl flex flex-col justify-between">
           <div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-300 text-xs font-extrabold uppercase tracking-wider mb-4">
               <Trophy className="w-3.5 h-3.5" />
@@ -372,7 +380,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onNavigate }) => {
               Beat Your Record
             </button>
           </div>
-        </div>
+        </PopIn>
       </div>
     </div>
   );

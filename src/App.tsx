@@ -4,7 +4,8 @@ import { useTheme } from './hooks/useTheme';
 import { useTypingEngine } from './hooks/useTypingEngine';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
-import { AchievementToast } from './components/AchievementToast';
+import { AchievementPopup } from './components/AchievementPopup';
+import { PageTransition } from './components/animations/PageTransition';
 import { Home } from './pages/Home';
 import { Dashboard } from './pages/Dashboard';
 import { CoachPage } from './pages/CoachPage';
@@ -178,51 +179,54 @@ export const App: React.FC = () => {
         onLogout={handleLogout}
       />
 
-      {/* Main Content Area with Smooth Page Transition */}
-      <main className="flex-grow flex flex-col justify-center animate-fade-in">
-        {currentPage === 'test' && <Home engine={engine} onNavigate={handleNavigate} />}
-        {currentPage === 'dashboard' && <Dashboard user={user} onNavigate={handleNavigate} />}
-        {currentPage === 'coach' && <CoachPage onNavigate={handleNavigate} />}
-        {currentPage === 'practice' && <PracticePage onNavigate={handleNavigate} />}
-        {currentPage === 'keyboard' && <KeyboardPage onNavigate={handleNavigate} />}
-        {currentPage === 'history' && <HistoryPage onNavigate={handleNavigate} />}
-        {currentPage === 'analytics' && <AnalyticsPage onNavigate={handleNavigate} />}
-        {currentPage === 'leaderboard' && <Leaderboard userStats={engine.userStats} />}
-        {currentPage === 'daily-challenge' && <DailyChallengePage user={user} onNavigate={handleNavigate} />}
-        {currentPage === 'achievements' && <AchievementsPage />}
-        {currentPage === 'certificate' && (
-          <CertificatePage
-            initialCertificateId={activeCertificateId}
-            onNavigate={handleNavigate}
-          />
-        )}
-        {currentPage === 'about' && <About />}
-        {currentPage === 'login' && (
-          <LoginPage
-            onLoginSuccess={(u) => setUser(u)}
-            onNavigate={handleNavigate}
-          />
-        )}
-        {currentPage === 'signup' && (
-          <SignupPage
-            onSignupSuccess={(u) => setUser(u)}
-            onNavigate={handleNavigate}
-          />
-        )}
-        {currentPage === 'profile' && (
-          <ProfilePage
-            user={user}
-            onLogout={handleLogout}
-            onUpdateUser={(u) => setUser(u)}
-            onNavigate={handleNavigate}
-          />
-        )}
+      {/* Main Content Area with PageTransition */}
+      <main className="flex-grow flex flex-col justify-center">
+        <PageTransition key={currentPage}>
+          {currentPage === 'test' && <Home engine={engine} onNavigate={handleNavigate} />}
+          {currentPage === 'dashboard' && <Dashboard user={user} onNavigate={handleNavigate} />}
+          {currentPage === 'coach' && <CoachPage onNavigate={handleNavigate} />}
+          {currentPage === 'practice' && <PracticePage onNavigate={handleNavigate} />}
+          {currentPage === 'keyboard' && <KeyboardPage onNavigate={handleNavigate} />}
+          {currentPage === 'history' && <HistoryPage />}
+          {currentPage === 'analytics' && <AnalyticsPage />}
+          {currentPage === 'leaderboard' && <Leaderboard userStats={engine.userStats} />}
+          {currentPage === 'daily-challenge' && <DailyChallengePage user={user} onNavigate={handleNavigate} />}
+          {currentPage === 'achievements' && <AchievementsPage onNavigate={handleNavigate} />}
+          {currentPage === 'certificate' && (
+            <CertificatePage
+              initialCertificateId={activeCertificateId}
+              onNavigate={handleNavigate}
+            />
+          )}
+          {currentPage === 'about' && <About onNavigate={handleNavigate} />}
+          {currentPage === 'login' && (
+            <LoginPage
+              onLoginSuccess={(u) => setUser(u)}
+              onNavigate={handleNavigate}
+            />
+          )}
+          {currentPage === 'signup' && (
+            <SignupPage
+              onSignupSuccess={(u) => setUser(u)}
+              onNavigate={handleNavigate}
+            />
+          )}
+          {currentPage === 'profile' && (
+            <ProfilePage
+              user={user}
+              onLogout={handleLogout}
+              onUpdateUser={(u) => setUser(u)}
+              onNavigate={handleNavigate}
+            />
+          )}
+        </PageTransition>
       </main>
 
-      {/* Achievement Celebratory Toast */}
-      <AchievementToast
+      {/* Achievement Unlocked Centered Modal Popup */}
+      <AchievementPopup
         achievement={unlockedAchievement}
-        onDismiss={() => setUnlockedAchievement(null)}
+        onClose={() => setUnlockedAchievement(null)}
+        soundEnabled={engine.soundEnabled}
       />
 
       {/* Footer */}
