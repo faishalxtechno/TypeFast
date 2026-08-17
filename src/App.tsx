@@ -28,8 +28,22 @@ import { recordKeyEvents } from './services/weakKeyService';
 export const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('test');
   const [activeCertificateId, setActiveCertificateId] = useState<string | null>(null);
-  const [user, setUser] = useState<UserProfile | null>(getCurrentUser());
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [unlockedAchievement, setUnlockedAchievement] = useState<Achievement | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    getCurrentUser().then((currentUser) => {
+      if (mounted) {
+        setUser(currentUser);
+      }
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const { theme, toggleTheme } = useTheme();
   const engine = useTypingEngine();
@@ -38,6 +52,7 @@ export const App: React.FC = () => {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.toLowerCase();
+
       if (hash.startsWith('#/certificate')) {
         const parts = window.location.hash.split('/');
         if (parts.length >= 3 && parts[2]) {

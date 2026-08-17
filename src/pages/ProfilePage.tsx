@@ -71,9 +71,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   const achievements = getUserAchievements();
   const unlockedBadges = achievements.filter(a => !!a.unlockedAt);
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    const updated = updateProfile({
+    const updated = await updateProfile({
       name: editName.trim() || user.name,
       bio: editBio.trim()
     });

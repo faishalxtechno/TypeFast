@@ -1,6 +1,6 @@
 import { LeaderboardEntry, Difficulty, TestDuration } from '../types';
 import { getStoredStats } from '../utils/storage';
-import { getCurrentUser } from './authService';
+import { getCachedUser } from './authService';
 import { INITIAL_LEADERBOARD } from '../data/leaderboardData';
 
 export type LeaderboardTimeframe = 'daily' | 'weekly' | 'monthly' | 'allTime';
@@ -13,7 +13,7 @@ export function getLeaderboardEntries(options: {
   const { timeframe = 'allTime', duration = 'all', difficulty = 'all' } = options;
 
   const stats = getStoredStats();
-  const currentUser = getCurrentUser();
+  const currentUser = getCachedUser();
 
   // Baseline top global players
   const baseEntries: LeaderboardEntry[] = INITIAL_LEADERBOARD.map(e => ({

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Mail, Lock, LogIn, ArrowRight } from 'lucide-react';
 import { Page, UserProfile } from '../types';
-import { loginUser } from '../services/authService';
+import { loginUser, resetPassword } from '../services/authService';
 
 interface LoginPageProps {
   onLoginSuccess: (user: UserProfile) => void;
@@ -15,29 +15,37 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [forgotNotice, setForgotNotice] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
     setForgotNotice(null);
 
-    setTimeout(() => {
-      const res = loginUser(email, password);
-      setIsLoading(false);
-      if (res.success && res.user) {
-        onLoginSuccess(res.user);
-        onNavigate('dashboard');
-      } else {
-        setError(res.error || 'Failed to sign in. Please verify your credentials.');
-      }
-    }, 250);
+    const res = await loginUser(email, password);
+
+    setIsLoading(false);
+
+    if (res.success && res.user) {
+      onLoginSuccess(res.user);
+      onNavigate('dashboard');
+    } else {
+      setError(res.error || 'Failed to sign in. Please verify your credentials.');
+    }
   };
 
-  const handleForgotPassword = () => {
-    setError(null);
-    setForgotNotice('If an account exists with that email, password reset instructions will be sent.');
-    setTimeout(() => setForgotNotice(null), 5000);
-  };
+  const handleForgotPassword = async () => {
+  setError(null);
+  setForgotNotice(null);
+
+  const result = await resetPassword(email);
+
+  if (result.success) {
+    setForgotNotice('Password reset email sent. Check your inbox.');
+  } else {
+    setError(result.error || 'Unable to send reset email.');
+  }
+};
+
 
   return (
     <div className="w-full max-w-md mx-auto px-4 py-12 sm:py-16 animate-fade-in">
