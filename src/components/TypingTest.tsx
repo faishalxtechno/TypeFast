@@ -1,6 +1,8 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useLayoutEffect, useState, useCallback } from 'react';
 import { RotateCcw, MousePointerClick, Sparkles } from 'lucide-react';
 import { TestStatus } from '../hooks/useTypingEngine';
+import { useSettings } from '../context/SettingsContext';
+import { CaretStyle } from '../types/settings';
 
 interface TypingTestProps {
   status: TestStatus;
@@ -13,6 +15,14 @@ interface TypingTestProps {
   onRestart: () => void;
 }
 
+interface CaretCoordinates {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  className: string;
+}
+
 export const TypingTest: React.FC<TypingTestProps> = ({
   status,
   words,
@@ -23,10 +33,39 @@ export const TypingTest: React.FC<TypingTestProps> = ({
   onInput,
   onRestart,
 }) => {
+  const { settings } = useSettings();
+  const caretStyle: CaretStyle = settings.caretStyle || 'line';
+
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const activeWordRef = useRef<HTMLDivElement>(null);
+  const charRefs = useRef<Record<string, HTMLElement | null>>({});
+
   const [isFocused, setIsFocused] = useState<boolean>(true);
+  const [caretCoords, setCaretCoords] = useState<CaretCoordinates | null>(null);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState<boolean>(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return false;
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  });
+
+  // Listen to prefers-reduced-motion OS changes
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mql = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const onChange = () => setPrefersReducedMotion(mql.matches);
+    try {
+      mql.addEventListener('change', onChange);
+    } catch {
+      mql.addListener(onChange);
+    }
+    return () => {
+      try {
+        mql.removeEventListener('change', onChange);
+      } catch {
+        mql.removeListener(onChange);
+      }
+    };
+  }, []);
 
   // Focus input automatically on mount and status reset
   useEffect(() => {
@@ -68,6 +107,141 @@ export const TypingTest: React.FC<TypingTestProps> = ({
     }
   }, [wordIndex]);
 
+  // Dedicated caret position calculator based on rendered character bounding rect
+  const updateCaretPosition = useCallback(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const currentWord = words[wordIndex] || '';
+    const currentInputLength = userInput.length;
+    let targetEl: HTMLElement | null = null;
+    let isAtEndOfWord = false;
+    let isOvertyped = false;
+
+    if (currentInputLength < currentWord.length) {
+      // Current active character in word
+      targetEl = charRefs.current[`${wordIndex}-${currentInputLength}`] || null;
+    } else if (currentInputLength === currentWord.length) {
+      // At the end of the word, target is the trailing space element of this word
+      targetEl = charRefs.current[`${wordIndex}-space`] || null;
+      isAtEndOfWord = true;
+    } else {
+      // Overtyped extra characters
+      const extraIdx = currentInputLength - currentWord.length - 1;
+      targetEl = charRefs.current[`${wordIndex}-extra-${extraIdx}`] || null;
+      isOvertyped = true;
+    }
+
+    // Fallback: first char of current word or active word container
+    if (!targetEl) {
+      targetEl = charRefs.current[`${wordIndex}-0`] || activeWordRef.current;
+    }
+
+    if (!targetEl) return;
+
+    const targetRect = targetEl.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+
+    // Position relative to container taking container scroll into account
+    const scrollLeft = container.scrollLeft || 0;
+    const scrollTop = container.scrollTop || 0;
+
+    const rawLeft = targetRect.left - containerRect.left + scrollLeft;
+    const rawTop = targetRect.top - containerRect.top + scrollTop;
+    const rawWidth = targetRect.width || 14;
+    const rawHeight = targetRect.height || 28;
+
+    let left = rawLeft;
+    let top = rawTop;
+    let width = rawWidth;
+    let height = rawHeight;
+    let className = '';
+
+    if (caretStyle === 'block') {
+      className = 'caret-block';
+      if (isOvertyped) {
+        left = rawLeft + rawWidth;
+        width = 12;
+      } else if (isAtEndOfWord) {
+        width = Math.max(rawWidth, 12);
+      } else {
+        width = rawWidth;
+      }
+    } else if (caretStyle === 'underline') {
+      className = 'caret-underline';
+      height = 3;
+      top = rawTop + rawHeight - 3;
+      if (isOvertyped) {
+        left = rawLeft + rawWidth;
+        width = 12;
+      } else if (isAtEndOfWord) {
+        width = Math.max(rawWidth, 12);
+      } else {
+        width = rawWidth;
+      }
+    } else {
+      // Line Caret (Default)
+      className = 'caret-line';
+      width = 2.5;
+      if (isOvertyped) {
+        left = rawLeft + rawWidth;
+      } else {
+        left = rawLeft;
+      }
+    }
+
+    setCaretCoords({
+      left,
+      top,
+      width,
+      height,
+      className
+    });
+  }, [words, wordIndex, userInput, caretStyle]);
+
+  // Recalculate caret on state changes
+  useLayoutEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      updateCaretPosition();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [updateCaretPosition, wordIndex, userInput, words, caretStyle]);
+
+  // Handle ResizeObserver, window resize, and container scroll events
+  useEffect(() => {
+    const handleResize = () => {
+      requestAnimationFrame(updateCaretPosition);
+    };
+
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && containerRef.current) {
+      resizeObserver = new ResizeObserver(() => {
+        requestAnimationFrame(updateCaretPosition);
+      });
+      resizeObserver.observe(containerRef.current);
+    }
+
+    const containerEl = containerRef.current;
+    if (containerEl) {
+      containerEl.addEventListener('scroll', handleResize, { passive: true });
+    }
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+      if (resizeObserver) resizeObserver.disconnect();
+      if (containerEl) {
+        containerEl.removeEventListener('scroll', handleResize);
+      }
+    };
+  }, [updateCaretPosition]);
+
+  const shouldAnimate = settings.animationsEnabled && !prefersReducedMotion;
+  const shouldBlink = settings.animationsEnabled && !prefersReducedMotion;
+
   return (
     <div className="w-full max-w-4xl mx-auto flex flex-col items-center">
       {/* Hidden input to capture keystrokes reliably on desktop & mobile */}
@@ -77,7 +251,10 @@ export const TypingTest: React.FC<TypingTestProps> = ({
         value={userInput}
         onChange={(e) => onInput(e.target.value)}
         onKeyDown={onKeyDown}
-        onFocus={() => setIsFocused(true)}
+        onFocus={() => {
+          setIsFocused(true);
+          requestAnimationFrame(updateCaretPosition);
+        }}
         onBlur={() => setIsFocused(false)}
         className="opacity-0 absolute w-px h-px -top-96 left-0 text-transparent bg-transparent border-0 outline-none select-none"
         autoCapitalize="off"
@@ -105,8 +282,25 @@ export const TypingTest: React.FC<TypingTestProps> = ({
         {/* Typing Words Area */}
         <div
           ref={containerRef}
-          className="w-full h-36 overflow-hidden flex flex-wrap gap-x-3 gap-y-2 sm:gap-x-4 sm:gap-y-3.5 font-mono text-xl sm:text-2xl md:text-3xl leading-relaxed tracking-wide transition-all"
+          className="relative w-full h-36 overflow-hidden flex flex-wrap gap-y-2 sm:gap-y-3.5 font-mono text-xl sm:text-2xl md:text-3xl leading-relaxed tracking-wide transition-all"
         >
+          {/* Real Animated Overlay Caret */}
+          {caretCoords && isFocused && status !== 'completed' && (
+            <span
+              className={`typing-caret ${caretCoords.className} ${
+                shouldAnimate ? 'typing-caret-animated' : ''
+              } ${shouldBlink ? 'caret-blinking' : ''}`}
+              style={{
+                left: `${caretCoords.left}px`,
+                top: `${caretCoords.top}px`,
+                width: `${caretCoords.width}px`,
+                height: `${caretCoords.height}px`,
+              }}
+              aria-hidden="true"
+            />
+          )}
+
+          {/* Words and Characters Matrix */}
           {words.slice(0, Math.max(80, wordIndex + 40)).map((word, wIdx) => {
             const isCurrentWord = wIdx === wordIndex;
             const isPastWord = wIdx < wordIndex;
@@ -116,7 +310,7 @@ export const TypingTest: React.FC<TypingTestProps> = ({
               <div
                 key={wIdx}
                 ref={isCurrentWord ? activeWordRef : undefined}
-                className={`relative flex items-center rounded-lg px-1.5 py-0.5 transition-colors duration-150 ${
+                className={`relative inline-flex items-center rounded-lg px-1 py-0.5 transition-colors duration-150 mr-2 sm:mr-3 ${
                   isCurrentWord
                     ? 'bg-slate-100/90 dark:bg-slate-800/80 ring-1 ring-slate-300 dark:ring-slate-700/80 shadow-sm'
                     : ''
@@ -125,7 +319,6 @@ export const TypingTest: React.FC<TypingTestProps> = ({
                 {/* Render expected word characters */}
                 {word.split('').map((char, cIdx) => {
                   let charClass = 'text-slate-400 dark:text-slate-500'; // untyped
-                  let isCurrentCaret = false;
 
                   if (isPastWord) {
                     if (cIdx < pastInput.length) {
@@ -144,17 +337,19 @@ export const TypingTest: React.FC<TypingTestProps> = ({
                           ? 'text-emerald-600 dark:text-emerald-400 font-semibold'
                           : 'text-rose-600 dark:text-rose-400 bg-rose-500/20 underline decoration-rose-500 font-bold';
                     } else if (cIdx === userInput.length) {
-                      isCurrentCaret = true;
                       charClass = 'text-slate-900 dark:text-white font-medium';
                     }
                   }
 
                   return (
-                    <span key={cIdx} className={`relative transition-colors duration-100 ${charClass}`}>
-                      {/* Smooth Glowing Active Caret */}
-                      {isCurrentWord && isCurrentCaret && (
-                        <span className="absolute -left-0.5 top-0 bottom-0 w-[2.5px] bg-brand-500 dark:bg-brand-400 rounded-full animate-smooth-caret" />
-                      )}
+                    <span
+                      key={cIdx}
+                      ref={(el) => {
+                        if (el) charRefs.current[`${wIdx}-${cIdx}`] = el;
+                        else delete charRefs.current[`${wIdx}-${cIdx}`];
+                      }}
+                      className={`relative transition-colors duration-100 ${charClass}`}
+                    >
                       {char}
                     </span>
                   );
@@ -162,19 +357,18 @@ export const TypingTest: React.FC<TypingTestProps> = ({
 
                 {/* Extra incorrect characters typed beyond original word length */}
                 {isCurrentWord && userInput.length > word.length && (
-                  <>
-                    {userInput.slice(word.length).split('').map((extraChar, extraIdx) => (
-                      <span
-                        key={`extra-${extraIdx}`}
-                        className="text-rose-600 dark:text-rose-400 bg-rose-500/20 underline decoration-rose-500 font-bold opacity-80"
-                      >
-                        {extraChar}
-                      </span>
-                    ))}
-                    <span className="relative">
-                      <span className="absolute -left-0.5 top-0 bottom-0 w-[2.5px] bg-brand-500 dark:bg-brand-400 rounded-full animate-smooth-caret" />
+                  userInput.slice(word.length).split('').map((extraChar, extraIdx) => (
+                    <span
+                      key={`extra-${extraIdx}`}
+                      ref={(el) => {
+                        if (el) charRefs.current[`${wIdx}-extra-${extraIdx}`] = el;
+                        else delete charRefs.current[`${wIdx}-extra-${extraIdx}`];
+                      }}
+                      className="text-rose-600 dark:text-rose-400 bg-rose-500/20 underline decoration-rose-500 font-bold opacity-80"
+                    >
+                      {extraChar}
                     </span>
-                  </>
+                  ))
                 )}
 
                 {/* Past word extra characters */}
@@ -183,6 +377,19 @@ export const TypingTest: React.FC<TypingTestProps> = ({
                     {pastInput.slice(word.length)}
                   </span>
                 )}
+
+                {/* Space character element for precise measurement & space caret position */}
+                <span
+                  ref={(el) => {
+                    if (el) charRefs.current[`${wIdx}-space`] = el;
+                    else delete charRefs.current[`${wIdx}-space`];
+                  }}
+                  className="inline-block opacity-0 pointer-events-none select-none"
+                  style={{ width: '0.45em', minWidth: '8px' }}
+                  aria-hidden="true"
+                >
+                  {'\u00A0'}
+                </span>
               </div>
             );
           })}

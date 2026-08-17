@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Page, UserProfile, Achievement } from './types';
+import { SettingsProvider, useSettings } from './context/SettingsContext';
 import { useTheme } from './hooks/useTheme';
 import { useTypingEngine } from './hooks/useTypingEngine';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
+import { SettingsModal } from './components/SettingsModal';
 import { AchievementPopup } from './components/AchievementPopup';
 import { PageTransition } from './components/animations/PageTransition';
 import { Home } from './pages/Home';
@@ -25,11 +27,15 @@ import { getCurrentUser, logoutUser } from './services/authService';
 import { checkAndUnlockAchievements } from './services/achievementService';
 import { recordKeyEvents } from './services/weakKeyService';
 
-export const App: React.FC = () => {
+const AppContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('test');
   const [activeCertificateId, setActiveCertificateId] = useState<string | null>(null);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [unlockedAchievement, setUnlockedAchievement] = useState<Achievement | null>(null);
+
+  const { isSettingsOpen, openSettings, closeSettings } = useSettings();
+  const { theme, toggleTheme } = useTheme();
+  const engine = useTypingEngine();
 
   useEffect(() => {
     let mounted = true;
@@ -44,9 +50,6 @@ export const App: React.FC = () => {
       mounted = false;
     };
   }, []);
-
-  const { theme, toggleTheme } = useTheme();
-  const engine = useTypingEngine();
 
   // Listen to URL hash changes e.g. #/dashboard, #/coach, #/practice, #/keyboard
   useEffect(() => {
@@ -143,12 +146,19 @@ export const App: React.FC = () => {
     }
   }, [engine.status, engine.result, engine.typedWords, engine.words]);
 
-  // Global keyboard shortcuts (e.g. Tab + Enter or Esc to restart)
+  // Global keyboard shortcuts (e.g. Tab + Enter or Esc to restart; Cmd+, / Ctrl+, to open settings)
   useEffect(() => {
     let tabPressed = false;
     let tabTimeout: ReturnType<typeof setTimeout> | null = null;
 
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      // Open settings on Ctrl+, or Cmd+,
+      if ((e.ctrlKey || e.metaKey) && e.key === ',') {
+        e.preventDefault();
+        openSettings();
+        return;
+      }
+
       const target = e.target as HTMLElement | null;
       if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') && target.getAttribute('aria-label') !== 'Typing test input arena') {
         return;
@@ -178,7 +188,7 @@ export const App: React.FC = () => {
       window.removeEventListener('keydown', handleGlobalKeyDown);
       if (tabTimeout) clearTimeout(tabTimeout);
     };
-  }, [engine]);
+  }, [engine, openSettings]);
 
   return (
     <div className="min-h-screen flex flex-col justify-between bg-slate-50 text-slate-900 dark:bg-[#090d16] dark:text-slate-100 transition-colors duration-300">
@@ -192,6 +202,7 @@ export const App: React.FC = () => {
         onToggleSound={() => engine.setSoundEnabled(!engine.soundEnabled)}
         user={user}
         onLogout={handleLogout}
+        onOpenSettings={openSettings}
       />
 
       {/* Main Content Area with PageTransition */}
@@ -237,6 +248,12 @@ export const App: React.FC = () => {
         </PageTransition>
       </main>
 
+      {/* Settings Modal (Global) */}
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={closeSettings}
+      />
+
       {/* Achievement Unlocked Centered Modal Popup */}
       <AchievementPopup
         achievement={unlockedAchievement}
@@ -247,6 +264,14 @@ export const App: React.FC = () => {
       {/* Footer */}
       <Footer onNavigate={handleNavigate} />
     </div>
+  );
+};
+
+export const App: React.FC = () => {
+  return (
+    <SettingsProvider>
+      <AppContent />
+    </SettingsProvider>
   );
 };
 

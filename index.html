@@ -6,29 +6,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
     <!-- Primary SEO Meta Tags -->
-    <title>TypeFast — Type Faster. Type Smarter.</title>
-    <meta name="title" content="TypeFast — Type Faster. Type Smarter." />
-    <meta name="description" content="TypeFast is a modern typing test platform to improve your typing speed, accuracy, and consistency." />
-    <meta name="keywords" content="TypeFast, typing test, WPM test, typing speed, learn typing, touch typing, typing practice, words per minute" />
+    <title>TypeFast v2.0 — Modern Typing Speed & Accuracy Platform</title>
+    <meta name="title" content="TypeFast v2.0 — Modern Typing Speed & Accuracy Platform" />
+    <meta name="description" content="TypeFast v2.0 is a modern typing speed test platform with 6 rich themes, audio synthesizer feedback, virtual keyboard, and instant certificates." />
+    <meta name="keywords" content="TypeFast, typing test, WPM test, typing speed, learn typing, touch typing, typing practice, words per minute, typing certificate" />
     <meta name="author" content="Faishal Naushad" />
     <meta name="theme-color" content="#10b981" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="TypeFast — Type Faster. Type Smarter." />
-    <meta property="og:description" content="TypeFast is a modern typing test platform to improve your typing speed, accuracy, and consistency." />
+    <meta property="og:title" content="TypeFast v2.0 — Modern Typing Speed & Accuracy Platform" />
+    <meta property="og:description" content="TypeFast v2.0 is a modern typing speed test platform with 6 rich themes, audio synthesizer feedback, virtual keyboard, and instant certificates." />
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:title" content="TypeFast — Type Faster. Type Smarter." />
-    <meta property="twitter:description" content="TypeFast is a modern typing test platform to improve your typing speed, accuracy, and consistency." />
+    <meta property="twitter:title" content="TypeFast v2.0 — Modern Typing Speed & Accuracy Platform" />
+    <meta property="twitter:description" content="TypeFast v2.0 is a modern typing speed test platform with 6 rich themes, audio synthesizer feedback, virtual keyboard, and instant certificates." />
 
     <!-- Google Fonts: Inter & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+
+    <!-- Immediate Theme Initialization Script to prevent Theme Flash -->
+    <script>
+      (function() {
+        try {
+          var raw = localStorage.getItem('typefast_v2_settings') || localStorage.getItem('typefast_settings');
+          var themeMode = 'system';
+          var selectedTheme = 'classic';
+          var caretStyle = 'line';
+          if (raw) {
+            var parsed = JSON.parse(raw);
+            if (parsed.themeMode) themeMode = parsed.themeMode;
+            if (parsed.selectedTheme) selectedTheme = parsed.selectedTheme;
+            if (parsed.caretStyle) caretStyle = parsed.caretStyle;
+          } else {
+            var legacyTheme = localStorage.getItem('typefast_theme');
+            if (legacyTheme === 'light' || legacyTheme === 'dark') themeMode = legacyTheme;
+          }
+          var isDark = themeMode === 'dark' || (themeMode === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          var root = document.documentElement;
+          if (isDark) {
+            root.classList.add('dark');
+          } else {
+            root.classList.remove('dark');
+          }
+          root.setAttribute('data-theme', selectedTheme);
+          root.setAttribute('data-theme-mode', themeMode);
+          root.setAttribute('data-caret', caretStyle);
+        } catch (e) {}
+      })();
+    </script>
   </head>
-  <body class="bg-slate-50 text-slate-900 dark:bg-[#090d16] dark:text-slate-100 antialiased min-h-screen transition-colors duration-300 selection:bg-brand-500/25 selection:text-brand-500 overflow-x-hidden">
+  <body class="antialiased min-h-screen transition-colors duration-300 selection:bg-brand-500/25 selection:text-brand-500 overflow-x-hidden">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

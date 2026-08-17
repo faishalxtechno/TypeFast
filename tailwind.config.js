@@ -12,6 +12,20 @@ export default {
         mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
       },
       colors: {
+        theme: {
+          primary: 'var(--theme-primary)',
+          primaryHover: 'var(--theme-primary-hover)',
+          secondary: 'var(--theme-secondary)',
+          bg: 'var(--theme-bg)',
+          surface: 'var(--theme-surface)',
+          card: 'var(--theme-card)',
+          border: 'var(--theme-border)',
+          borderSubtle: 'var(--theme-border-subtle)',
+          textMain: 'var(--theme-text-main)',
+          textSub: 'var(--theme-text-sub)',
+          textMuted: 'var(--theme-text-muted)',
+          caret: 'var(--theme-caret)',
+        },
         brand: {
           50: '#ecfdf5',
           100: '#d1fae5',
@@ -77,6 +91,7 @@ export default {
         'glow-brand': '0 0 25px -5px rgba(16, 185, 129, 0.25)',
         'glow-cyan': '0 0 25px -5px rgba(6, 182, 212, 0.25)',
         'glow-amber': '0 0 25px -5px rgba(245, 158, 11, 0.25)',
+        'glow-theme': '0 0 25px -5px var(--theme-primary-glow)',
         'card-glass': '0 8px 32px 0 rgba(0, 0, 0, 0.2)',
       }
     },

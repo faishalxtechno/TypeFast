@@ -1,12 +1,15 @@
 import React from 'react';
-import { Zap, Mail } from 'lucide-react';
+import { Zap, Mail, Sliders } from 'lucide-react';
 import { Page } from '../types';
+import { useSettings } from '../context/SettingsContext';
 
 interface FooterProps {
   onNavigate: (page: Page) => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
+  const { openSettings } = useSettings();
+
   return (
     <footer id="footer" className="w-full mt-24 border-t border-slate-200/80 dark:border-slate-800/80 bg-white/70 dark:bg-[#090d16]/90 backdrop-blur-md transition-colors pt-14 pb-10">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -17,15 +20,20 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-emerald-600 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
                 <Zap className="w-4 h-4 fill-white" />
               </div>
-              <span className="font-extrabold text-xl tracking-tight text-slate-900 dark:text-white">
-                Type<span className="text-brand-500">Fast</span>
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="font-extrabold text-xl tracking-tight text-slate-900 dark:text-white">
+                  Type<span className="text-brand-500">Fast</span>
+                </span>
+                <span className="px-1.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-brand-500/15 text-brand-600 dark:text-brand-400 border border-brand-500/25">
+                  v2.0
+                </span>
+              </div>
             </div>
             <p className="text-sm font-semibold text-brand-600 dark:text-brand-400">
               Type Faster. Type Smarter.
             </p>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed max-w-sm">
-              The AI-powered typing improvement platform. Discover weak keys with interactive heatmaps, drill personalized training passages, track streaks, and earn verified certificates.
+              The modern typing test platform with 6 rich themes, audio synthesizer feedback, virtual keyboard visualization, and instant verified credentials.
             </p>
           </div>
 
@@ -81,7 +89,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           {/* Connect & Achievements */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">
-              Streaks & Community
+              Community & Preferences
             </h4>
             <ul className="space-y-2 text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 mb-4">
               <li>
@@ -118,10 +126,11 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               </li>
               <li>
                 <button
-                  onClick={() => onNavigate('about')}
-                  className="btn-interactive hover:text-brand-500 dark:hover:text-brand-400 transition-colors flex items-center gap-1 cursor-pointer"
+                  onClick={openSettings}
+                  className="btn-interactive text-brand-600 dark:text-brand-400 hover:underline font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
-                  <span>About TypeFast</span>
+                  <Sliders className="w-3.5 h-3.5" />
+                  <span>Settings & Themes</span>
                 </button>
               </li>
             </ul>

@@ -1,43 +1,78 @@
 /**
- * Web Audio API Synthesizer for TypeFast
- * Zero-dependency, ultra-low latency, crisp tactile audio feedback.
+ * Web Audio API Synthesizer for TypeFast v2.0
+ * Zero-dependency, ultra-low latency, crisp tactile audio feedback with master volume control.
  */
 
 let audioCtx: AudioContext | null = null;
+let masterGain: GainNode | null = null;
+let currentMasterVolume = 0.5;
 
 /**
- * Initializes or resumes the Web Audio context upon user interaction.
+ * Initializes or resumes the Web Audio context upon user gesture.
  */
-export function initAudio(): AudioContext | null {
+export function initAudio(volume = currentMasterVolume): AudioContext | null {
   if (typeof window === 'undefined') return null;
-  
-  if (!audioCtx) {
-    const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    if (AudioContextClass) {
-      audioCtx = new AudioContextClass();
-    }
-  }
 
-  if (audioCtx && audioCtx.state === 'suspended') {
-    audioCtx.resume().catch(() => {
-      // Ignored if browser blocks resume prior to user gesture
-    });
+  try {
+    if (!audioCtx) {
+      const AudioContextClass =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+
+      if (AudioContextClass) {
+        audioCtx = new AudioContextClass();
+        masterGain = audioCtx.createGain();
+        masterGain.gain.setValueAtTime(volume, audioCtx.currentTime);
+        masterGain.connect(audioCtx.destination);
+      }
+    }
+
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(() => {
+        // Ignored if browser blocks resume prior to user gesture
+      });
+    }
+
+    if (masterGain && audioCtx) {
+      currentMasterVolume = volume;
+      masterGain.gain.setValueAtTime(volume, audioCtx.currentTime);
+    }
+  } catch {
+    // AudioContext not available in current environment
   }
 
   return audioCtx;
 }
 
 /**
+ * Updates the global audio volume.
+ * @param volume Value between 0.0 and 1.0
+ */
+export function setAudioVolume(volume: number): void {
+  currentMasterVolume = Math.max(0, Math.min(1, volume));
+  if (masterGain && audioCtx) {
+    try {
+      masterGain.gain.setValueAtTime(currentMasterVolume, audioCtx.currentTime);
+    } catch {
+      // ignore
+    }
+  }
+}
+
+/**
  * Plays a subtle, tactile mechanical keyboard click or soft error thud.
  *
  * @param isError True for mistyped character, false for correct character
+ * @param volumeScale Optional multiplier for this individual sound (defaults to 1.0)
  */
-export function playKeyClickSound(isError = false): void {
+export function playKeyClickSound(isError = false, volumeScale = 1.0): void {
   try {
     const ctx = initAudio();
-    if (!ctx || ctx.state !== 'running') return;
+    const mg = masterGain;
+    if (!ctx || ctx.state !== 'running' || !mg) return;
 
     const now = ctx.currentTime;
+    const effectiveGain = Math.max(0, Math.min(1, volumeScale));
 
     if (isError) {
       // Soft, low-frequency subtle error thud (non-distracting, short)
@@ -45,17 +80,17 @@ export function playKeyClickSound(isError = false): void {
       const gain = ctx.createGain();
 
       osc.type = 'triangle';
-      osc.frequency.setValueAtTime(160, now);
-      osc.frequency.exponentialRampToValueAtTime(70, now + 0.07);
+      osc.frequency.setValueAtTime(150, now);
+      osc.frequency.exponentialRampToValueAtTime(65, now + 0.075);
 
-      gain.gain.setValueAtTime(0.06, now);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.07);
+      gain.gain.setValueAtTime(0.08 * effectiveGain, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.075);
 
       osc.connect(gain);
-      gain.connect(ctx.destination);
+      gain.connect(mg);
 
       osc.start(now);
-      osc.stop(now + 0.07);
+      osc.stop(now + 0.075);
     } else {
       // Crisp, tactile mechanical switch click (organic subtle pitch variation)
       const osc = ctx.createOscillator();
@@ -67,11 +102,11 @@ export function playKeyClickSound(isError = false): void {
       osc.frequency.setValueAtTime(baseFreq, now);
       osc.frequency.exponentialRampToValueAtTime(140, now + 0.035);
 
-      gain.gain.setValueAtTime(0.045, now);
+      gain.gain.setValueAtTime(0.05 * effectiveGain, now);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.035);
 
       osc.connect(gain);
-      gain.connect(ctx.destination);
+      gain.connect(mg);
 
       osc.start(now);
       osc.stop(now + 0.035);
@@ -82,14 +117,16 @@ export function playKeyClickSound(isError = false): void {
 }
 
 /**
- * Plays an elegant, low-volume harmonic completion chime when the test ends.
+ * Plays an elegant, harmonious completion chime when the test ends.
  */
-export function playCompletionSound(): void {
+export function playCompletionSound(volumeScale = 1.0): void {
   try {
     const ctx = initAudio();
-    if (!ctx || ctx.state !== 'running') return;
+    const mg = masterGain;
+    if (!ctx || ctx.state !== 'running' || !mg) return;
 
     const now = ctx.currentTime;
+    const effectiveGain = Math.max(0, Math.min(1, volumeScale));
     // Harmonic notes: C5 (523.25Hz), E5 (659.25Hz), G5 (783.99Hz), C6 (1046.50Hz)
     const frequencies = [523.25, 659.25, 783.99, 1046.50];
 
@@ -102,16 +139,46 @@ export function playCompletionSound(): void {
       osc.frequency.setValueAtTime(freq, noteTime);
 
       gain.gain.setValueAtTime(0.0001, noteTime);
-      gain.gain.linearRampToValueAtTime(0.04, noteTime + 0.02);
+      gain.gain.linearRampToValueAtTime(0.06 * effectiveGain, noteTime + 0.02);
       gain.gain.exponentialRampToValueAtTime(0.0001, noteTime + 0.45);
 
       osc.connect(gain);
-      gain.connect(ctx.destination);
+      gain.connect(mg);
 
       osc.start(noteTime);
       osc.stop(noteTime + 0.45);
     });
   } catch {
     // Gracefully handle unsupported audio
+  }
+}
+
+/**
+ * Plays a very subtle, soft UI button interaction click.
+ */
+export function playButtonClickSound(volumeScale = 0.6): void {
+  try {
+    const ctx = initAudio();
+    const mg = masterGain;
+    if (!ctx || ctx.state !== 'running' || !mg) return;
+
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(420, now);
+    osc.frequency.exponentialRampToValueAtTime(220, now + 0.025);
+
+    gain.gain.setValueAtTime(0.03 * volumeScale, now);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.025);
+
+    osc.connect(gain);
+    gain.connect(mg);
+
+    osc.start(now);
+    osc.stop(now + 0.025);
+  } catch {
+    // ignore
   }
 }

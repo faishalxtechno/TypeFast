@@ -17,11 +17,13 @@ import {
   LogOut,
   ChevronDown,
   Sparkles,
-  Play
+  Play,
+  Settings as SettingsIcon
 } from 'lucide-react';
 import { Page, Theme, UserProfile } from '../types';
 import { ThemeToggle } from './ThemeToggle';
 import { getLevelInfo } from '../services/xpService';
+import { useSettings } from '../context/SettingsContext';
 
 interface HeaderProps {
   currentPage: Page;
@@ -32,6 +34,7 @@ interface HeaderProps {
   onToggleSound: () => void;
   user: UserProfile | null;
   onLogout: () => void;
+  onOpenSettings?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -42,11 +45,18 @@ export const Header: React.FC<HeaderProps> = ({
   soundEnabled,
   onToggleSound,
   user,
-  onLogout
+  onLogout,
+  onOpenSettings
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const { openSettings } = useSettings();
   const levelInfo = getLevelInfo();
+
+  const handleOpenSettingsModal = () => {
+    if (onOpenSettings) onOpenSettings();
+    else openSettings();
+  };
 
   const mainNavItems: { id: Page; label: string; icon: React.ReactNode }[] = [
     { id: 'test', label: 'Test', icon: <Keyboard className="w-4 h-4" /> },
@@ -64,26 +74,29 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-white/85 dark:bg-[#090d16]/85 border-b border-slate-200/80 dark:border-slate-800/80 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
-        {/* Brand Logo */}
+        {/* Brand Logo with v2.0 Badge */}
         <button
           onClick={() => {
             onNavigate('test');
             setMobileMenuOpen(false);
           }}
           className="flex items-center gap-2.5 group focus:outline-none focus:ring-2 focus:ring-brand-500/50 rounded-xl p-1 btn-interactive flex-shrink-0"
-          aria-label="TypeFast Home"
+          aria-label="TypeFast v2.0 Home"
         >
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-brand-500/25 group-hover:scale-105 transition-transform duration-200">
             <Zap className="w-5 h-5 text-white stroke-[2.5]" />
           </div>
-          <div className="flex flex-col text-left">
+          <div className="flex items-center gap-1.5 text-left">
             <span className="font-extrabold text-xl tracking-tight text-slate-900 dark:text-white">
               Type<span className="text-brand-500">Fast</span>
+            </span>
+            <span className="px-1.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-brand-500/15 text-brand-600 dark:text-brand-400 border border-brand-500/25">
+              v2.0
             </span>
           </div>
         </button>
 
-        {/* Desktop Primary Navigation */}
+        {/* Desktop Primary Navigation (2XL screens) */}
         <nav className="hidden 2xl:flex items-center gap-0.5 bg-slate-100/90 dark:bg-slate-900/70 p-1 rounded-2xl border border-slate-200/70 dark:border-slate-800/70">
           {mainNavItems.map((item) => {
             const isActive = currentPage === item.id;
@@ -141,11 +154,14 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
 
           {/* Level Badge */}
-          <div className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-mono font-black" title={`${levelInfo.title} (${levelInfo.currentXp} XP)`}>
+          <div
+            className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-mono font-black"
+            title={`${levelInfo.title} (${levelInfo.currentXp} XP)`}
+          >
             <span>Lvl {levelInfo.level}</span>
           </div>
 
-          {/* Sound click toggle */}
+          {/* Sound toggle button */}
           <button
             onClick={onToggleSound}
             aria-label={soundEnabled ? 'Disable typing sound' : 'Enable typing sound'}
@@ -153,14 +169,24 @@ export const Header: React.FC<HeaderProps> = ({
             className="btn-interactive p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/70 transition-all cursor-pointer"
           >
             {soundEnabled ? (
-              <Volume2 className="w-4 h-4 text-brand-500 dark:text-brand-400" />
+              <Volume2 className="w-4 h-4 text-emerald-500" />
             ) : (
               <VolumeX className="w-4 h-4 text-slate-400" />
             )}
           </button>
 
-          {/* Theme Toggle */}
+          {/* Theme Toggle (Light / Dark / System) */}
           <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+
+          {/* Settings Trigger Button */}
+          <button
+            onClick={handleOpenSettingsModal}
+            aria-label="Open Settings"
+            title="Preferences & Settings (Theme, Caret, Keyboard, Audio)"
+            className="btn-interactive p-2 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/70 transition-all cursor-pointer"
+          >
+            <SettingsIcon className="w-4 h-4 text-slate-600 dark:text-slate-300 hover:rotate-45 transition-transform duration-300" />
+          </button>
 
           {/* Auth State Button */}
           {user ? (
@@ -202,6 +228,16 @@ export const Header: React.FC<HeaderProps> = ({
                     <LayoutDashboard className="w-4 h-4 text-cyan-500" />
                     <span>Dashboard</span>
                   </button>
+                  <button
+                    onClick={() => {
+                      handleOpenSettingsModal();
+                      setUserDropdownOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2"
+                  >
+                    <SettingsIcon className="w-4 h-4 text-amber-500" />
+                    <span>Settings</span>
+                  </button>
                   <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
                   <button
                     onClick={() => {
@@ -234,8 +270,15 @@ export const Header: React.FC<HeaderProps> = ({
           )}
         </div>
 
-        {/* Mobile menu trigger */}
-        <div className="flex md:hidden items-center gap-2">
+        {/* Mobile quick controls & menu trigger */}
+        <div className="flex md:hidden items-center gap-1.5">
+          <button
+            onClick={handleOpenSettingsModal}
+            aria-label="Settings"
+            className="p-2 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 btn-interactive"
+          >
+            <SettingsIcon className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+          </button>
           <ThemeToggle theme={theme} onToggle={onToggleTheme} />
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -277,6 +320,17 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <Award className="w-4 h-4 text-yellow-500" />
             <span>Certificates</span>
+          </button>
+
+          <button
+            onClick={() => {
+              handleOpenSettingsModal();
+              setMobileMenuOpen(false);
+            }}
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60"
+          >
+            <SettingsIcon className="w-4 h-4 text-brand-500" />
+            <span>Settings & Themes</span>
           </button>
 
           <button
