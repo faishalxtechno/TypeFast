@@ -9,7 +9,6 @@ import {
   Clock,
   Award,
   CheckCircle2,
-  BarChart2,
   Sparkles,
   Download,
   Printer,
@@ -57,7 +56,6 @@ export const Result: React.FC<ResultProps> = ({ result, onRestart, onNavigate })
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    // If certificate was previously created for this test, automatically enable toggle
     const existing = getCertificateByTestId(result.id);
     if (existing) {
       setCertificate(existing);
@@ -67,14 +65,13 @@ export const Result: React.FC<ResultProps> = ({ result, onRestart, onNavigate })
   }, [result.id]);
 
   useEffect(() => {
-    // Confetti celebration if user set new record
     if (result.isNewBest || result.accuracy === 100 || result.wpm >= 80) {
       try {
         confetti({
-          particleCount: 80,
-          spread: 70,
+          particleCount: 70,
+          spread: 60,
           origin: { y: 0.6 },
-          colors: ['#10b981', '#06b6d4', '#f59e0b', '#8b5cf6']
+          colors: ['#FFFFFF', '#A7A6A6', '#FAFAFA', '#666666']
         });
       } catch {
         // Safe fallback
@@ -93,7 +90,6 @@ export const Result: React.FC<ResultProps> = ({ result, onRestart, onNavigate })
 
     setNameError(null);
 
-    // Reuse existing certificate or create new
     let cert = getCertificateByTestId(result.id);
     if (!cert) {
       cert = createCertificate(result, sanitized);
@@ -101,69 +97,54 @@ export const Result: React.FC<ResultProps> = ({ result, onRestart, onNavigate })
     }
 
     setCertificate(cert);
-    setIsModalOpen(true);
   };
 
   const handleCopyLink = async () => {
     if (!certificate) return;
-    const res = await shareCertificate(certificate);
-    setToastMessage(res.method === 'share' ? 'Shared successfully!' : 'Certificate details copied to clipboard!');
-    setTimeout(() => setToastMessage(null), 3000);
+    const ok = await shareCertificate(certificate);
+    if (ok) {
+      setToastMessage('Link copied to clipboard!');
+      setTimeout(() => setToastMessage(null), 3000);
+    }
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto rounded-3xl bg-white/90 dark:bg-[#0c1220]/90 border border-slate-200/90 dark:border-slate-800/90 shadow-2xl backdrop-blur-xl p-6 sm:p-10 space-y-8 animate-card-pop">
-      {/* Certificate Modal Dialog */}
-      <CertificateModal
-        certificate={certificate}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
-
-      {/* Header Banner */}
-      <div className="text-center space-y-2">
-        <div className="flex flex-wrap items-center justify-center gap-2 mb-2">
-          <PopIn delay={40}>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-600 dark:text-brand-400 text-xs font-bold uppercase tracking-wider">
-              <BarChart2 className="w-3.5 h-3.5" />
-              <span>Test Completed</span>
-            </div>
-          </PopIn>
-
-          <PopIn delay={80}>
-            <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold uppercase tracking-wider">
-              <Zap className="w-3.5 h-3.5 fill-amber-500" />
-              <span>+{xpAwarded} XP Earned</span>
-            </div>
-          </PopIn>
+    <div className="w-full max-w-4xl mx-auto p-6 sm:p-10 rounded-3xl bg-[#0c0c0c]/95 border border-[#1f1f1f] shadow-elevated-dark backdrop-blur-xl space-y-8 animate-fade-in text-left">
+      {/* Header Feedback */}
+      <div className="text-center space-y-3 pt-2">
+        <div className="flex items-center justify-center gap-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.06] border border-white/10 text-white text-xs font-semibold uppercase tracking-wider">
+            <Zap className="w-3.5 h-3.5 text-white" />
+            <span>Test Completed (+{xpAwarded} XP)</span>
+          </div>
 
           {result.isNewBest && (
-            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-amber-500/20 border-2 border-amber-500/40 text-amber-600 dark:text-amber-300 text-xs font-black uppercase tracking-wider animate-pb-celebrate">
-              <Trophy className="w-4 h-4 text-amber-500" />
-              <span>🏆 NEW PERSONAL BEST!</span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-xs font-bold uppercase tracking-wider">
+              <Trophy className="w-3.5 h-3.5 text-amber-400" />
+              <span>Personal Best</span>
             </div>
           )}
         </div>
 
-        <PopIn delay={100}>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+        <PopIn delay={80}>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-[#FAFAFA] tracking-tight">
             {feedback.tier}
           </h2>
-          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-md mx-auto mt-1">
+          <p className="text-sm sm:text-base text-[#A7A6A6] max-w-md mx-auto mt-1">
             {feedback.message}
           </p>
         </PopIn>
 
-        {/* Level XP Progress Mini Bar */}
-        <PopIn delay={140}>
+        {/* Level XP Progress */}
+        <PopIn delay={120}>
           <div className="pt-2 max-w-xs mx-auto">
-            <div className="flex justify-between items-center text-[11px] font-bold text-slate-500 mb-1">
+            <div className="flex justify-between items-center text-[10px] font-semibold text-[#888888] mb-1">
               <span>Level {levelInfo.level} • {levelInfo.title}</span>
               <span>{levelInfo.progressPercent}%</span>
             </div>
-            <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+            <div className="w-full h-1.5 rounded-full bg-[#1c1c1c] overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-amber-500 to-brand-500 transition-all duration-500"
+                className="h-full bg-white transition-all duration-500"
                 style={{ width: `${levelInfo.progressPercent}%` }}
               />
             </div>
@@ -171,77 +152,77 @@ export const Result: React.FC<ResultProps> = ({ result, onRestart, onNavigate })
         </PopIn>
       </div>
 
-      {/* 4 Core Primary Metrics Grid with Spring WPM & Stagger */}
+      {/* 4 Core Primary Metrics Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        {/* Net WPM with Spring animation */}
-        <StaggerItem index={0} className="p-4 sm:p-5 rounded-2xl bg-brand-500/10 border-2 border-brand-500/40 text-center flex flex-col justify-center shadow-lg shadow-brand-500/10">
-          <div className="flex items-center justify-center gap-1 text-xs font-bold text-brand-700 dark:text-brand-300 uppercase tracking-wider">
-            <Zap className="w-3.5 h-3.5 text-brand-500" />
-            <span>Net Speed</span>
+        {/* Net WPM */}
+        <StaggerItem index={0} className="p-4 sm:p-5 rounded-2xl bg-[#141414] border border-[#262626] text-center flex flex-col justify-center">
+          <div className="flex items-center justify-center gap-1 text-[11px] font-semibold text-[#A7A6A6] uppercase tracking-wider">
+            <Zap className="w-3.5 h-3.5 text-white" />
+            <span>Speed</span>
           </div>
-          <div className="text-4xl sm:text-5xl font-black font-mono text-brand-600 dark:text-brand-400 mt-1 animate-number-spring">
+          <div className="text-4xl sm:text-5xl font-mono font-bold text-[#FAFAFA] mt-1">
             {result.wpm}
           </div>
-          <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-            Words Per Minute
+          <div className="text-[10px] text-[#666666] font-medium mt-0.5">
+            WPM (Net)
           </div>
         </StaggerItem>
 
         {/* Accuracy */}
-        <StaggerItem index={1} className="p-4 sm:p-5 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 text-center flex flex-col justify-center">
-          <div className="flex items-center justify-center gap-1 text-xs font-bold text-cyan-700 dark:text-cyan-300 uppercase tracking-wider">
-            <Target className="w-3.5 h-3.5 text-cyan-500" />
+        <StaggerItem index={1} className="p-4 sm:p-5 rounded-2xl bg-[#141414] border border-[#262626] text-center flex flex-col justify-center">
+          <div className="flex items-center justify-center gap-1 text-[11px] font-semibold text-[#A7A6A6] uppercase tracking-wider">
+            <Target className="w-3.5 h-3.5 text-white" />
             <span>Accuracy</span>
           </div>
-          <div className="text-3xl sm:text-4xl font-black font-mono text-cyan-600 dark:text-cyan-400 mt-1">
+          <div className="text-3xl sm:text-4xl font-mono font-bold text-[#FAFAFA] mt-1">
             {result.accuracy.toFixed(1)}%
           </div>
-          <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-            Precision Rate
+          <div className="text-[10px] text-[#666666] font-medium mt-0.5">
+            Precision
           </div>
         </StaggerItem>
 
         {/* Errors */}
-        <StaggerItem index={2} className="p-4 sm:p-5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-center flex flex-col justify-center">
-          <div className="flex items-center justify-center gap-1 text-xs font-bold text-rose-700 dark:text-rose-300 uppercase tracking-wider">
-            <AlertCircle className="w-3.5 h-3.5 text-rose-500" />
+        <StaggerItem index={2} className="p-4 sm:p-5 rounded-2xl bg-[#141414] border border-[#262626] text-center flex flex-col justify-center">
+          <div className="flex items-center justify-center gap-1 text-[11px] font-semibold text-[#A7A6A6] uppercase tracking-wider">
+            <AlertCircle className="w-3.5 h-3.5 text-rose-400" />
             <span>Errors</span>
           </div>
-          <div className="text-3xl sm:text-4xl font-black font-mono text-rose-600 dark:text-rose-400 mt-1">
+          <div className={`text-3xl sm:text-4xl font-mono font-bold mt-1 ${result.errors > 0 ? 'text-rose-400' : 'text-[#FAFAFA]'}`}>
             {result.errors}
           </div>
-          <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+          <div className="text-[10px] text-[#666666] font-medium mt-0.5">
             Uncorrected
           </div>
         </StaggerItem>
 
         {/* Duration */}
-        <StaggerItem index={3} className="p-4 sm:p-5 rounded-2xl bg-slate-100/90 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-center flex flex-col justify-center">
-          <div className="flex items-center justify-center gap-1 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
-            <Clock className="w-3.5 h-3.5 text-slate-500" />
-            <span>Duration</span>
+        <StaggerItem index={3} className="p-4 sm:p-5 rounded-2xl bg-[#141414] border border-[#262626] text-center flex flex-col justify-center">
+          <div className="flex items-center justify-center gap-1 text-[11px] font-semibold text-[#A7A6A6] uppercase tracking-wider">
+            <Clock className="w-3.5 h-3.5 text-white" />
+            <span>Mode</span>
           </div>
-          <div className="text-3xl sm:text-4xl font-black font-mono text-slate-800 dark:text-slate-200 mt-1">
+          <div className="text-3xl sm:text-4xl font-mono font-bold text-[#FAFAFA] mt-1">
             {result.duration}s
           </div>
-          <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium capitalize">
-            {result.difficulty} Tier
+          <div className="text-[10px] text-[#666666] font-medium capitalize mt-0.5">
+            {result.difficulty}
           </div>
         </StaggerItem>
       </div>
 
       {/* AI Coach Quick Diagnostic Card */}
-      <PopIn delay={220} className="p-5 sm:p-6 rounded-3xl bg-slate-50 dark:bg-slate-950/70 border border-brand-500/30 space-y-4 shadow-sm">
+      <PopIn delay={200} className="p-5 sm:p-6 rounded-2xl bg-[#121212] border border-[#222222] space-y-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400">
-            <Sparkles className="w-4 h-4 text-brand-500" />
-            <span>AI Coach Diagnostics</span>
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#FAFAFA]">
+            <Sparkles className="w-4 h-4 text-white" />
+            <span>AI Diagnostic Analysis</span>
           </div>
           {analysis.weakKeys.length > 0 && (
-            <div className="flex items-center gap-1.5 text-xs text-slate-500">
-              <span>Weak keys:</span>
+            <div className="flex items-center gap-1.5 text-xs text-[#A7A6A6]">
+              <span>Hesitation keys:</span>
               {analysis.weakKeys.map(k => (
-                <span key={k} className="px-1.5 py-0.5 rounded bg-rose-500/15 text-rose-600 dark:text-rose-400 font-mono font-bold text-[11px]">
+                <span key={k} className="px-1.5 py-0.5 rounded bg-white/10 text-white font-mono font-bold text-[11px]">
                   {k}
                 </span>
               ))}
@@ -249,18 +230,18 @@ export const Result: React.FC<ResultProps> = ({ result, onRestart, onNavigate })
           )}
         </div>
 
-        <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
-          💡 <strong>Coach Advice:</strong> {analysis.recommendation}
+        <p className="text-xs sm:text-sm text-[#A7A6A6] leading-relaxed">
+          {analysis.recommendation}
         </p>
 
         {onNavigate && (
-          <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-800 text-xs">
-            <span className="text-slate-500">Recommended mode: <strong className="capitalize text-slate-800 dark:text-slate-200">{analysis.recommendedMode}</strong></span>
+          <div className="flex items-center justify-between pt-2 border-t border-[#1c1c1c] text-xs">
+            <span className="text-[#666666]">Recommended drill: <strong className="capitalize text-[#FAFAFA]">{analysis.recommendedMode}</strong></span>
             <button
               onClick={() => onNavigate('practice')}
-              className="btn-interactive text-xs font-bold text-brand-600 dark:text-brand-400 hover:underline flex items-center gap-1 cursor-pointer"
+              className="text-xs font-semibold text-white hover:underline flex items-center gap-1 cursor-pointer"
             >
-              <span>Practice My Weak Keys</span>
+              <span>Practice Targeted Drills</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -268,79 +249,77 @@ export const Result: React.FC<ResultProps> = ({ result, onRestart, onNavigate })
       </PopIn>
 
       {/* Certificate Generation Toggle Section */}
-      <PopIn delay={280} className="p-5 sm:p-6 rounded-3xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 space-y-5">
+      <PopIn delay={250} className="p-5 sm:p-6 rounded-2xl bg-[#121212] border border-[#222222] space-y-4">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center flex-shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-white/10 text-white flex items-center justify-center flex-shrink-0">
               <Award className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
-                Generate Official Typing Certificate
+              <h4 className="text-sm sm:text-base font-semibold text-[#FAFAFA]">
+                Verified Typing Certificate
               </h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Claim a verified landscape A4 achievement credential with your name and speed score.
+              <p className="text-xs text-[#A7A6A6]">
+                Generate an official verifiable A4 achievement credential with your score.
               </p>
             </div>
           </div>
 
-          {/* Smooth Toggle Switch */}
           <button
             type="button"
             role="switch"
             aria-checked={generateCertEnabled}
             onClick={() => setGenerateCertEnabled(!generateCertEnabled)}
-            className={`btn-interactive relative inline-flex h-7 w-14 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-250 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-500 ${
-              generateCertEnabled ? 'bg-brand-500' : 'bg-slate-300 dark:bg-slate-700'
+            className={`relative inline-flex h-6 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+              generateCertEnabled ? 'bg-white' : 'bg-[#222222]'
             }`}
           >
             <span
-              className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-lg ring-0 toggle-knob ${
-                generateCertEnabled ? 'translate-x-7' : 'translate-x-0'
+              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-[#050505] shadow transition duration-200 ${
+                generateCertEnabled ? 'translate-x-6' : 'translate-x-0'
               }`}
             />
           </button>
         </div>
 
-        {/* Revealed Name Input Form when Toggle is ON */}
         {generateCertEnabled && (
-          <div className="pt-4 border-t border-slate-200/80 dark:border-slate-800/80 animate-fade-in">
+          <div className="pt-4 border-t border-[#1c1c1c] animate-fade-in">
             {!certificate ? (
               <form onSubmit={handleGenerateCertificate} className="space-y-3">
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                  Your Name on Certificate
+                <label className="block text-xs font-semibold text-[#A7A6A6]">
+                  Recipient Name on Certificate
                 </label>
-                <div className="flex flex-col sm:flex-row gap-2.5">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="text"
                     value={recipientName}
                     onChange={(e) => setRecipientName(e.target.value)}
-                    placeholder="Enter your full name (e.g. Faishal Naushad)"
+                    placeholder="Enter your full name"
                     maxLength={50}
-                    className="flex-grow px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder-slate-400"
+                    className="flex-grow px-4 py-2 rounded-xl bg-[#181818] border border-[#2e2e2e] text-white text-sm font-medium focus:outline-none focus:border-white placeholder-[#666666]"
                   />
                   <button
                     type="submit"
-                    className="btn-interactive px-6 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm shadow-md shadow-brand-500/25 flex items-center justify-center gap-2 cursor-pointer flex-shrink-0"
+                    className="px-5 py-2 rounded-xl bg-white text-black font-semibold text-xs sm:text-sm hover:bg-[#E5E5E5] transition-colors flex items-center justify-center gap-1.5 cursor-pointer flex-shrink-0"
                   >
                     <Award className="w-4 h-4" />
-                    <span>Get Your Certificate</span>
+                    <span>Create Certificate</span>
                   </button>
                 </div>
                 {nameError && (
-                  <p className="text-xs text-rose-500 font-semibold">{nameError}</p>
+                  <p className="text-xs text-rose-400">{nameError}</p>
                 )}
               </form>
             ) : (
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-brand-500/10 border border-brand-500/30">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-[#181818] border border-[#2a2a2a]">
                 <div className="flex items-center gap-2.5">
-                  <CheckCircle2 className="w-5 h-5 text-brand-500 flex-shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-white flex-shrink-0" />
                   <div>
-                    <div className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
-                      Certificate Generated for <span className="text-brand-600 dark:text-brand-400">{certificate.name}</span>
+                    <div className="font-semibold text-xs sm:text-sm text-[#FAFAFA]">
+                      Certificate Issued: <span className="text-white font-bold">{certificate.name}</span>
                     </div>
-                    <div className="font-mono text-xs text-slate-500">
-                      Credential ID: {certificate.id}
+                    <div className="font-mono text-[10px] text-[#888888]">
+                      ID: {certificate.id}
                     </div>
                   </div>
                 </div>
@@ -348,28 +327,28 @@ export const Result: React.FC<ResultProps> = ({ result, onRestart, onNavigate })
                 <div className="flex flex-wrap items-center gap-2">
                   <button
                     onClick={() => setIsModalOpen(true)}
-                    className="btn-interactive flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold shadow-xs cursor-pointer"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white text-black text-xs font-semibold hover:bg-[#E5E5E5] transition-colors cursor-pointer"
                   >
                     <Eye className="w-3.5 h-3.5" />
                     <span>View</span>
                   </button>
                   <button
                     onClick={() => downloadCertificatePNG(certificate)}
-                    className="btn-interactive flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold cursor-pointer"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#222222] text-[#FAFAFA] hover:bg-[#2c2c2c] text-xs font-semibold transition-colors cursor-pointer"
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>PNG</span>
                   </button>
                   <button
                     onClick={() => printCertificate()}
-                    className="btn-interactive flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold cursor-pointer"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#222222] text-[#FAFAFA] hover:bg-[#2c2c2c] text-xs font-semibold transition-colors cursor-pointer"
                   >
                     <Printer className="w-3.5 h-3.5" />
                     <span>Print</span>
                   </button>
                   <button
                     onClick={handleCopyLink}
-                    className="btn-interactive flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold cursor-pointer"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#222222] text-[#FAFAFA] hover:bg-[#2c2c2c] text-xs font-semibold transition-colors cursor-pointer"
                   >
                     <Share2 className="w-3.5 h-3.5" />
                     <span>Share</span>
@@ -382,22 +361,31 @@ export const Result: React.FC<ResultProps> = ({ result, onRestart, onNavigate })
       </PopIn>
 
       {toastMessage && (
-        <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center justify-center gap-1.5 animate-fade-in">
+        <div className="p-3 rounded-xl bg-white/10 border border-white/20 text-white text-xs font-semibold flex items-center justify-center gap-1.5 animate-fade-in">
           <Check className="w-4 h-4" />
           <span>{toastMessage}</span>
         </div>
       )}
 
-      {/* Restart Test Button */}
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+      {/* Restart Button */}
+      <div className="flex items-center justify-center pt-2">
         <button
           onClick={onRestart}
-          className="btn-interactive w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm sm:text-base shadow-lg shadow-brand-500/25 cursor-pointer"
+          className="flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-[#FAFAFA] hover:bg-white text-[#050505] font-semibold text-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-white-pill cursor-pointer"
         >
-          <RotateCcw className="w-5 h-5" />
-          <span>Restart Test (Tab + Enter)</span>
+          <RotateCcw className="w-4 h-4" />
+          <span>Restart Test (Esc)</span>
         </button>
       </div>
+
+      {/* Modal */}
+      {isModalOpen && certificate && (
+        <CertificateModal
+          certificate={certificate}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
     </div>
   );
 };

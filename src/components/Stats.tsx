@@ -1,5 +1,4 @@
 import React from 'react';
-import { Timer as TimerIcon, Zap, Target, AlertCircle } from 'lucide-react';
 
 interface StatsProps {
   timeLeft: number;
@@ -16,55 +15,51 @@ export const Stats: React.FC<StatsProps> = ({
   errors,
   isTestRunning,
 }) => {
+  // Format time as MM:SS or SSs
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
+  const formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
   const statItems = [
-    {
-      label: 'TIME',
-      value: `${timeLeft}s`,
-      numericValue: timeLeft,
-      icon: <TimerIcon className="w-4 h-4 text-brand-500" />,
-      colorClass: timeLeft <= 5 && isTestRunning ? 'text-rose-500 animate-pulse font-black' : 'text-brand-600 dark:text-brand-400',
-    },
     {
       label: 'WPM',
       value: wpm,
-      numericValue: wpm,
-      icon: <Zap className="w-4 h-4 text-amber-500" />,
-      colorClass: 'text-amber-500 dark:text-amber-400',
+      color: 'text-[#FAFAFA]',
     },
     {
       label: 'ACCURACY',
       value: `${accuracy.toFixed(1)}%`,
-      numericValue: accuracy,
-      icon: <Target className="w-4 h-4 text-cyan-500" />,
-      colorClass: 'text-cyan-600 dark:text-cyan-400',
+      color: 'text-[#FAFAFA]',
+    },
+    {
+      label: 'TIME',
+      value: formattedTime,
+      color: timeLeft <= 5 && isTestRunning ? 'text-rose-400 font-bold animate-pulse' : 'text-[#FAFAFA]',
     },
     {
       label: 'ERRORS',
       value: errors,
-      numericValue: errors,
-      icon: <AlertCircle className="w-4 h-4 text-rose-500" />,
-      colorClass: errors > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400 dark:text-slate-500',
+      color: errors > 0 ? 'text-rose-400' : 'text-[#666666]',
     },
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 w-full max-w-3xl mx-auto">
-      {statItems.map((item, idx) => (
-        <div
-          key={idx}
-          className="flex flex-col items-center justify-center p-3.5 sm:p-4 rounded-2xl bg-white/80 dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800/90 backdrop-blur-md shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200 hover:scale-[1.02]"
-        >
-          <div className="flex items-center gap-1.5 mb-1">
-            {item.icon}
-            <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+    <div className="w-full max-w-2xl mx-auto py-3 px-6 rounded-2xl bg-[#0c0c0c]/80 border border-[#1c1c1c] backdrop-blur-md">
+      <div className="grid grid-cols-4 divide-x divide-[#222222]">
+        {statItems.map((item, idx) => (
+          <div
+            key={idx}
+            className="flex flex-col items-center justify-center px-2 py-1 select-none"
+          >
+            <span className="text-[10px] sm:text-xs font-semibold tracking-wider text-[#A7A6A6] uppercase mb-0.5">
               {item.label}
             </span>
+            <span className={`text-xl sm:text-2xl lg:text-3xl font-mono font-bold tracking-tight ${item.color} transition-colors`}>
+              {item.value}
+            </span>
           </div>
-          <span className={`text-2xl sm:text-4xl font-extrabold tracking-tight font-mono ${item.colorClass} transition-colors`}>
-            {item.value}
-          </span>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };

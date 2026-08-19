@@ -92,7 +92,6 @@ export const TypingTest: React.FC<TypingTestProps> = ({
       const wordTop = activeWord.offsetTop;
       const offset = wordTop - containerTop;
 
-      // When the user reaches line 2+, scroll smoothly
       if (offset > 50) {
         container.scrollTo({
           top: offset - 24,
@@ -107,7 +106,7 @@ export const TypingTest: React.FC<TypingTestProps> = ({
     }
   }, [wordIndex]);
 
-  // Dedicated caret position calculator based on rendered character bounding rect
+  // Caret coordinate calculator
   const updateCaretPosition = useCallback(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -119,20 +118,16 @@ export const TypingTest: React.FC<TypingTestProps> = ({
     let isOvertyped = false;
 
     if (currentInputLength < currentWord.length) {
-      // Current active character in word
       targetEl = charRefs.current[`${wordIndex}-${currentInputLength}`] || null;
     } else if (currentInputLength === currentWord.length) {
-      // At the end of the word, target is the trailing space element of this word
       targetEl = charRefs.current[`${wordIndex}-space`] || null;
       isAtEndOfWord = true;
     } else {
-      // Overtyped extra characters
       const extraIdx = currentInputLength - currentWord.length - 1;
       targetEl = charRefs.current[`${wordIndex}-extra-${extraIdx}`] || null;
       isOvertyped = true;
     }
 
-    // Fallback: first char of current word or active word container
     if (!targetEl) {
       targetEl = charRefs.current[`${wordIndex}-0`] || activeWordRef.current;
     }
@@ -142,7 +137,6 @@ export const TypingTest: React.FC<TypingTestProps> = ({
     const targetRect = targetEl.getBoundingClientRect();
     const containerRect = container.getBoundingClientRect();
 
-    // Position relative to container taking container scroll into account
     const scrollLeft = container.scrollLeft || 0;
     const scrollTop = container.scrollTop || 0;
 
@@ -180,7 +174,7 @@ export const TypingTest: React.FC<TypingTestProps> = ({
         width = rawWidth;
       }
     } else {
-      // Line Caret (Default)
+      // Line Caret
       className = 'caret-line';
       width = 2.5;
       if (isOvertyped) {
@@ -199,7 +193,6 @@ export const TypingTest: React.FC<TypingTestProps> = ({
     });
   }, [words, wordIndex, userInput, caretStyle]);
 
-  // Recalculate caret on state changes
   useLayoutEffect(() => {
     const frame = requestAnimationFrame(() => {
       updateCaretPosition();
@@ -207,7 +200,6 @@ export const TypingTest: React.FC<TypingTestProps> = ({
     return () => cancelAnimationFrame(frame);
   }, [updateCaretPosition, wordIndex, userInput, words, caretStyle]);
 
-  // Handle ResizeObserver, window resize, and container scroll events
   useEffect(() => {
     const handleResize = () => {
       requestAnimationFrame(updateCaretPosition);
@@ -244,7 +236,7 @@ export const TypingTest: React.FC<TypingTestProps> = ({
 
   return (
     <div className="w-full max-w-4xl mx-auto flex flex-col items-center">
-      {/* Hidden input to capture keystrokes reliably on desktop & mobile */}
+      {/* Hidden input to capture keystrokes reliably */}
       <input
         ref={inputRef}
         type="text"
@@ -264,17 +256,17 @@ export const TypingTest: React.FC<TypingTestProps> = ({
         aria-label="Typing test input arena"
       />
 
-      {/* Main Typing Container */}
+      {/* Main Cinematic Typing Arena Container */}
       <div
         onClick={handleContainerClick}
-        className="relative w-full rounded-3xl p-6 sm:p-10 bg-white/90 dark:bg-slate-900/85 border-2 border-slate-200/90 dark:border-slate-800/90 backdrop-blur-xl shadow-xl transition-all duration-300 cursor-text group select-none min-h-[230px] flex flex-col justify-between hover:border-brand-500/50 dark:hover:border-brand-500/50 focus-within:ring-2 focus-within:ring-brand-500/30"
+        className="relative w-full rounded-3xl p-6 sm:p-10 bg-[#0a0a0a]/90 border border-[#1f1f1f] backdrop-blur-xl shadow-elevated-dark transition-all duration-300 cursor-text group select-none min-h-[220px] flex flex-col justify-between hover:border-[#333333] focus-within:border-white/40"
       >
         {/* Unfocused Overlay Notice */}
         {!isFocused && status !== 'completed' && (
-          <div className="absolute inset-0 z-20 backdrop-blur-[3px] bg-slate-900/35 rounded-3xl flex items-center justify-center transition-all animate-fade-in">
-            <div className="flex items-center gap-2.5 px-6 py-3 rounded-2xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-semibold text-sm shadow-2xl border border-slate-200 dark:border-slate-700 animate-pulse">
-              <MousePointerClick className="w-4 h-4 text-brand-500" />
-              <span>Click or tap anywhere to focus typing arena</span>
+          <div className="absolute inset-0 z-20 backdrop-blur-[2px] bg-black/60 rounded-3xl flex items-center justify-center transition-all animate-fade-in">
+            <div className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#141414] text-[#FAFAFA] font-medium text-xs sm:text-sm shadow-xl border border-[#2a2a2a]">
+              <MousePointerClick className="w-4 h-4 text-white" />
+              <span>Click anywhere or press any key to focus</span>
             </div>
           </div>
         )}
@@ -282,9 +274,9 @@ export const TypingTest: React.FC<TypingTestProps> = ({
         {/* Typing Words Area */}
         <div
           ref={containerRef}
-          className="relative w-full h-36 overflow-hidden flex flex-wrap gap-y-2 sm:gap-y-3.5 font-mono text-xl sm:text-2xl md:text-3xl leading-relaxed tracking-wide transition-all"
+          className="relative w-full h-32 sm:h-36 overflow-hidden flex flex-wrap gap-y-2 sm:gap-y-3 font-mono text-xl sm:text-2xl md:text-3xl leading-relaxed tracking-wide transition-all"
         >
-          {/* Real Animated Overlay Caret */}
+          {/* Animated Overlay Caret */}
           {caretCoords && isFocused && status !== 'completed' && (
             <span
               className={`typing-caret ${caretCoords.className} ${
@@ -300,7 +292,7 @@ export const TypingTest: React.FC<TypingTestProps> = ({
             />
           )}
 
-          {/* Words and Characters Matrix */}
+          {/* Words Matrix */}
           {words.slice(0, Math.max(80, wordIndex + 40)).map((word, wIdx) => {
             const isCurrentWord = wIdx === wordIndex;
             const isPastWord = wIdx < wordIndex;
@@ -311,33 +303,29 @@ export const TypingTest: React.FC<TypingTestProps> = ({
                 key={wIdx}
                 ref={isCurrentWord ? activeWordRef : undefined}
                 className={`relative inline-flex items-center rounded-lg px-1 py-0.5 transition-colors duration-150 mr-2 sm:mr-3 ${
-                  isCurrentWord
-                    ? 'bg-slate-100/90 dark:bg-slate-800/80 ring-1 ring-slate-300 dark:ring-slate-700/80 shadow-sm'
-                    : ''
+                  isCurrentWord ? 'bg-white/[0.04] ring-1 ring-white/10' : ''
                 }`}
               >
-                {/* Render expected word characters */}
                 {word.split('').map((char, cIdx) => {
-                  let charClass = 'text-slate-400 dark:text-slate-500'; // untyped
+                  let charClass = 'text-[#444444]'; // untyped muted gray
 
                   if (isPastWord) {
                     if (cIdx < pastInput.length) {
                       charClass =
                         pastInput[cIdx] === char
-                          ? 'text-emerald-600 dark:text-emerald-400 font-semibold'
-                          : 'text-rose-600 dark:text-rose-400 bg-rose-500/15 underline decoration-rose-500 font-semibold';
+                          ? 'text-[#FAFAFA] font-medium'
+                          : 'text-rose-400 underline decoration-rose-500 font-medium';
                     } else {
-                      // Missed characters in past word
-                      charClass = 'text-rose-400/70 dark:text-rose-500/70 opacity-60';
+                      charClass = 'text-rose-400/60 opacity-60';
                     }
                   } else if (isCurrentWord) {
                     if (cIdx < userInput.length) {
                       charClass =
                         userInput[cIdx] === char
-                          ? 'text-emerald-600 dark:text-emerald-400 font-semibold'
-                          : 'text-rose-600 dark:text-rose-400 bg-rose-500/20 underline decoration-rose-500 font-bold';
+                          ? 'text-[#FAFAFA] font-medium'
+                          : 'text-rose-400 bg-rose-500/15 underline decoration-rose-500 font-bold';
                     } else if (cIdx === userInput.length) {
-                      charClass = 'text-slate-900 dark:text-white font-medium';
+                      charClass = 'text-[#FAFAFA]';
                     }
                   }
 
@@ -355,7 +343,7 @@ export const TypingTest: React.FC<TypingTestProps> = ({
                   );
                 })}
 
-                {/* Extra incorrect characters typed beyond original word length */}
+                {/* Overtyped extra characters */}
                 {isCurrentWord && userInput.length > word.length && (
                   userInput.slice(word.length).split('').map((extraChar, extraIdx) => (
                     <span
@@ -364,21 +352,14 @@ export const TypingTest: React.FC<TypingTestProps> = ({
                         if (el) charRefs.current[`${wIdx}-extra-${extraIdx}`] = el;
                         else delete charRefs.current[`${wIdx}-extra-${extraIdx}`];
                       }}
-                      className="text-rose-600 dark:text-rose-400 bg-rose-500/20 underline decoration-rose-500 font-bold opacity-80"
+                      className="text-rose-400 bg-rose-500/20 underline decoration-rose-500 font-bold opacity-90"
                     >
                       {extraChar}
                     </span>
                   ))
                 )}
 
-                {/* Past word extra characters */}
-                {isPastWord && pastInput.length > word.length && (
-                  <span className="text-rose-500/70 line-through text-sm self-center ml-0.5">
-                    {pastInput.slice(word.length)}
-                  </span>
-                )}
-
-                {/* Space character element for precise measurement & space caret position */}
+                {/* Space boundary for precise caret positioning */}
                 <span
                   ref={(el) => {
                     if (el) charRefs.current[`${wIdx}-space`] = el;
@@ -395,21 +376,21 @@ export const TypingTest: React.FC<TypingTestProps> = ({
           })}
         </div>
 
-        {/* Typing Instructions and Quick Restart Controls */}
-        <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-200/80 dark:border-slate-800/80 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+        {/* Footer controls: Status and Restart */}
+        <div className="flex items-center justify-between mt-6 pt-4 border-t border-[#1c1c1c] text-xs text-[#A7A6A6]">
           <div className="flex items-center gap-2">
             {status === 'idle' ? (
-              <span className="flex items-center gap-1.5 text-brand-600 dark:text-brand-400 font-semibold animate-pulse">
-                <Sparkles className="w-3.5 h-3.5" />
+              <span className="flex items-center gap-1.5 text-[#B6B5B5]">
+                <Sparkles className="w-3.5 h-3.5 text-white" />
                 <span>Start typing to begin test</span>
               </span>
             ) : (
-              <span className="flex items-center gap-2 font-medium">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+              <span className="flex items-center gap-2 text-[#FAFAFA]">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
                 </span>
-                <span>Test in progress...</span>
+                <span>Test in progress</span>
               </span>
             )}
           </div>
@@ -421,16 +402,16 @@ export const TypingTest: React.FC<TypingTestProps> = ({
                 onRestart();
                 inputRef.current?.focus();
               }}
-              className="btn-interactive flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 font-semibold transition-all duration-150 shadow-sm border border-slate-200 dark:border-slate-700 cursor-pointer"
-              title="Restart test (Esc or click)"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#141414] hover:bg-[#1f1f1f] text-[#FAFAFA] text-xs font-medium transition-colors border border-[#262626] cursor-pointer"
+              title="Restart test (Esc)"
               aria-label="Restart typing test"
             >
-              <RotateCcw className="w-3.5 h-3.5 text-brand-500" />
-              <span>Restart Test</span>
+              <RotateCcw className="w-3 h-3 text-[#A7A6A6]" />
+              <span>Restart</span>
             </button>
 
-            <span className="hidden sm:flex items-center gap-1 text-slate-400 dark:text-slate-500 text-xs">
-              <kbd className="px-1.5 py-0.5 rounded bg-slate-200/80 dark:bg-slate-800 font-mono text-[10px] border border-slate-300 dark:border-slate-700">Esc</kbd>
+            <span className="hidden sm:flex items-center gap-1 text-[#666666] text-xs font-mono">
+              <kbd className="px-1.5 py-0.5 rounded bg-[#141414] text-[10px] border border-[#242424]">Esc</kbd>
               <span>to reset</span>
             </span>
           </div>
